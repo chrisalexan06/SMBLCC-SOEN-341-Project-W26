@@ -1,36 +1,24 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+SOEN 341 Project
+Celina Younes
+Léa Saad
+Bianca Ignat
+Mohamed Salah
+Christina Alexandrakis 
+Sarah Tannous
 
-## Getting Started
+Description of Web Application:
+NutriFlow is a web application designed to help students plan meals, manage recipes, and track healthy eating habits. 
+Built in TypeScript using the Next.js framework with a Node.js backend, the app stores data in a SQL PostgreSQL database. 
+The UI is styled with Tailwind CSS, and the visual layout is designed in Figma. Possible Future components 
+include social features such as adding friends, viewing others meals. Additional health tools like calorie calculators, daily 
+and per‑meal calorie tracking, weight goals, along with Google Maps and API integrations for locating gyms and grocery stores may be added. 
+We’re aiming to create a complete and fun experience that helps users work on themselves, stay motivated, and enjoy building healthier habits.
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Brainstorming ideas:
+Add friends feature, see others meals,
+google maps to add local gyms, stores, calculator for calories
+in profile add weight show maitenance of calories, add weight goals,
+show the number of calories per meal, adding the calories per day
+streaks features, share streaks with people, share status with friends,
+google api, strava idea = makes posts => feed of food 
+use mongodb, with typescript, tailwind css, nodejs with nextjs
