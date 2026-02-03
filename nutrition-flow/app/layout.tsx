@@ -7,6 +7,7 @@ import {
   SignedOut,
   UserButton, } from '@clerk/nextjs';
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "@/app/components/ui/sonner";
 import "./globals.css";
 import "./styles/index.css";
 
@@ -42,6 +43,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
     </ClerkProvider>
