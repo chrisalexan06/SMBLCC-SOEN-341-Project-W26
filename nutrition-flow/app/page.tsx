@@ -41,7 +41,7 @@ export default function Home() {
         <Link href="/login">
             <Button 
               size="lg" 
-              className="text-lg px-8 py-6 bg-gradient-to-r from-brand-lilac to-brand-sage hover:to-brand-sage text-white hover:scale-105"
+              className="text-lg px-8 py-6"
             >
               Get Started
             </Button>

@@ -8,7 +8,12 @@ export function Login() {
 
   const handleGoogleSignIn = () => {
     // Mock sign in - redirect to dashboard
-    router.push("/");
+    router.push("/dashboard");
+  };
+
+  const handleEmailLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    router.push("/dashboard");
   };
 
   return (
@@ -92,11 +97,12 @@ export function Login() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <form className="space-y-4" onSubmit={handleEmailLogin}>
               <div>
                 <label className="block mb-2">Email</label>
                 <input
                   type="email"
+                  required
                   placeholder="name@example.com"
                   className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
                   style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--sage-green)' } as React.CSSProperties}
@@ -106,19 +112,20 @@ export function Login() {
                 <label className="block mb-2">Password</label>
                 <input
                   type="password"
+                  required
                   placeholder="••••••••"
                   className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
                   style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--sage-green)' } as React.CSSProperties}
                 />
               </div>
               <Button
-                onClick={handleGoogleSignIn}
+                type="submit"
                 className="w-full h-12 text-white"
                 style={{ backgroundColor: 'var(--sage-green)' }}
               >
                 Sign in
               </Button>
-            </div>
+            </form>
 
             <div className="text-center text-sm">
               <span className="text-muted-foreground">Don't have an account? </span>
