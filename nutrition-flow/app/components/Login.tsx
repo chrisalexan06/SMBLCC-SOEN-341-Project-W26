@@ -1,21 +1,45 @@
 "use client";
 
+import { useSignIn } from "@clerk/nextjs";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/app/components/ui/button";
 import { Check } from "lucide-react";
 
 export function Login() {
+  const { signIn, setActive } = useSignIn();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleGoogleSignIn = () => {
-    // Mock sign in - redirect to dashboard
-    router.push("/dashboard");
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    
+    try {
+      const result = await signIn?.create({
+        identifier: email,
+        password,
+      });
+
+      if (result?.status === "complete") {
+        await setActive?({ session: result.createdSessionId }):
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err.errors?.[0]?.message || "Invalid email or password");
+      console.error("Error:", err);
+    }
   };
 
-  const handleEmailLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    router.push("/dashboard");
+  const handleGoogleSignIn = () => {
+    signIn?.authenticateWithRedirect({
+      strategy: "oauth_google",
+      redirectUrl: "/sso-callback",
+      redirectUrlComplete: "/dashboard",
+    });
   };
 
   return (
@@ -63,6 +87,12 @@ export function Login() {
             <p className="text-muted-foreground">Log in to continue to your account</p>
           </div>
 
+          {error && (
+            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-4">
             <Button
               onClick={handleGoogleSignIn}
@@ -105,6 +135,8 @@ export function Login() {
                 <input
                   type="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
                   className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 bg-white"
                   style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--sage-green)' } as React.CSSProperties}
@@ -115,6 +147,8 @@ export function Login() {
                 <input
                   type="password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 bg-white"
                   style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--sage-green)' } as React.CSSProperties}
@@ -131,7 +165,7 @@ export function Login() {
 
             <div className="text-center text-sm">
               <span className="text-muted-foreground">Don't have an account? </span>
-              <button className="hover:underline" style={{ color: 'var(--sage-green-dark)' }}>
+              <button onClick={() => router.push('/signup')} className="hover:underline" style={{ color: 'var(--sage-green-dark)' }}>
                 Sign up
               </button>
             </div>
