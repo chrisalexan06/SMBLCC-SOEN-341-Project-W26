@@ -52,10 +52,8 @@ export function Login() {
             alt="Nutrition Flow Logo"
             width={405}
             height={405}
+            priority
           />
-          <p className="text-lg" style={{ color: 'var(--sage-green-dark)' }}>
-            Your social meal planner for student life
-          </p>
           <div className="mt-12 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#C8B5D9]">
