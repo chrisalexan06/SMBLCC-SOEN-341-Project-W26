@@ -8,7 +8,7 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// --- ENUMS (Great choice!) ---
+// ENUMS
 enum ActivityLevel {
   SEDENTARY
   LIGHT
@@ -33,23 +33,23 @@ enum DietaryType {
   PESCATARIAN
 }
 
-// --- MODELS ---
+// Model
 
 model User {
-  id            String    @id // Clerk ID
+  id            String    @id 
 
   email         String    @unique
-  firstName     String?   // Made optional just in case Clerk doesn't send it
-  lastName      String?
+  firstName     String   
+  lastName      String
   
-  // ⚠️ These MUST be optional (?) so we can create the user 
-  // BEFORE they finish the onboarding form.
-  age           Int?
-  currentWeight Float?
+   
+  
+  age           Int
+  currentWeight Float
   targetWeight  Float?
-  height        Float?
+  height        Float
 
-  // Enums (Also optional for now)
+  // Enums 
   activityLevel ActivityLevel? 
   goal          Goal?          
   dietaryType   DietaryType?   
@@ -62,17 +62,17 @@ model User {
   updatedAt     DateTime  @updatedAt
 }
 
-// You were missing this table!
+
 model Meal {
   id        String   @id @default(uuid())
   
   name      String
-  imageUrl  String?
+  imageUrl  String
   
-  calories  Int
-  protein   Int
-  carbs     Int
-  fats      Int
+  calories  Int?
+  protein   Int?
+  carbs     Int?
+  fats      Int?
   
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
