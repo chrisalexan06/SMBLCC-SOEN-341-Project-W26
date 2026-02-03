@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/app/components/ui/button";
+import { Check } from "lucide-react";
 
 export function Login() {
   const router = useRouter();
@@ -19,30 +21,33 @@ export function Login() {
   return (
     <div className="flex h-screen">
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center items-center p-12" style={{ backgroundColor: 'var(--sage-green-light)' }}>
+      <div className="hidden lg:flex lg:w-1/3 flex-col justify-center items-center p-12" style={{ backgroundColor: 'var(--sage-green-light)' }}>
         <div className="max-w-md">
-          <h1 className="text-5xl mb-6" style={{ color: 'var(--sage-green-dark)' }}>
-            NutriFlow
-          </h1>
-          <p className="text-xl" style={{ color: 'var(--sage-green-dark)' }}>
+          <Image
+            src="/images/logo1.png"
+            alt="Nutrition Flow Logo"
+            width={405}
+            height={405}
+          />
+          <p className="text-lg" style={{ color: 'var(--sage-green-dark)' }}>
             Your social meal planner for student life
           </p>
           <div className="mt-12 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--lilac-purple)' }}>
-                <span className="text-xl">🍽️</span>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#C8B5D9]">
+                <Check className="w-4 h-4 text-white" />
               </div>
               <p className="text-lg">Track your meals and calories</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--lilac-purple)' }}>
-                <span className="text-xl">📸</span>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#C8B5D9]">
+                <Check className="w-4 h-4 text-white" />
               </div>
               <p className="text-lg">Share food photos with friends</p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'var(--lilac-purple)' }}>
-                <span className="text-xl">🗺️</span>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#C8B5D9]">
+                <Check className="w-4 h-4 text-white" />
               </div>
               <p className="text-lg">Discover nearby restaurants</p>
             </div>
@@ -54,11 +59,8 @@ export function Login() {
       <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left">
-            <h1 className="text-4xl mb-2 lg:hidden" style={{ color: 'var(--sage-green-dark)' }}>
-              NutriFlow
-            </h1>
             <h2 className="text-3xl mb-2">Welcome back</h2>
-            <p className="text-muted-foreground">Sign in to continue to your account</p>
+            <p className="text-muted-foreground">Log in to continue to your account</p>
           </div>
 
           <div className="space-y-4">
@@ -85,7 +87,7 @@ export function Login() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Sign in with Google
+              Log in with Google
             </Button>
 
             <div className="relative">
@@ -123,7 +125,7 @@ export function Login() {
                 className="w-full h-12 text-white"
                 style={{ backgroundColor: 'var(--sage-green)' }}
               >
-                Sign in
+                Log in
               </Button>
             </form>
 
