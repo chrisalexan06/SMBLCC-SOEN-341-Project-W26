@@ -21,7 +21,7 @@ export function Login() {
   return (
     <div className="flex h-screen">
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/3 flex-col justify-center items-center p-12" style={{ backgroundColor: 'var(--sage-green-light)' }}>
+      <div className="hidden lg:flex lg:w-1/3 flex-col justify-center items-center p-12" style={{ backgroundColor: 'var(--white)' }}>
         <div className="max-w-md">
           <Image
             src="/images/logo1.png"
@@ -56,7 +56,7 @@ export function Login() {
       </div>
 
       {/* Right side - Login Form */}
-      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-white">
+      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-sage-green-light">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center lg:text-left">
             <h2 className="text-3xl mb-2">Welcome back</h2>
@@ -95,7 +95,7 @@ export function Login() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-muted-foreground">Or continue with email</span>
+                <span className="bg-sage-green-light px-2 text-muted-foreground">Or continue with email</span>
               </div>
             </div>
 
@@ -106,7 +106,7 @@ export function Login() {
                   type="email"
                   required
                   placeholder="name@example.com"
-                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
+                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 bg-white"
                   style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--sage-green)' } as React.CSSProperties}
                 />
               </div>
@@ -116,7 +116,7 @@ export function Login() {
                   type="password"
                   required
                   placeholder="••••••••"
-                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
+                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 bg-white"
                   style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--sage-green)' } as React.CSSProperties}
                 />
               </div>

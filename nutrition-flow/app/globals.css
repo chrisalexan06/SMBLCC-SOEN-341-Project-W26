@@ -3,6 +3,9 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --sage-green: #A8B5A0;
+  --sage-green-light: #E8EFE5;
+  --sage-green-dark: #6B7C62;
 }
 
 @theme inline {
@@ -12,6 +15,7 @@
   --font-mono: var(--font-geist-mono);
   --color-brand-lilac: #C8B5D9;
   --color-brand-sage: #A8B5A0;
+  --color-sage-green-light: #E8EFE5;
 }
 
 @media (prefers-color-scheme: dark) {
