@@ -37,6 +37,7 @@ model User {
   id            String   @id
 
   email         String   @unique
+  password      String
   firstName     String
   lastName      String
   age           Int
@@ -56,4 +57,27 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
          
+}
+model Meal {
+  id        String   @id @default(uuid()) //uuid gives a complex string,to protect from hackers 
+
+  name      String
+  imagePath String  // store supabase storage PATH, not full URL
+
+  calories  Float?
+  protein   Float?
+  carbs     Float?
+  fats      Float?
+
+  loggedAt  DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+//Does not store new data when @@, only just organize the data we already have
+  @@index([userId]) //Creates a list of all meals sorted by who ate them. So that it is faster to find the history of all the meals a user ate.
+  @@index([loggedAt]) //Crestes a list of all meals sorted by date/time. 
 }
