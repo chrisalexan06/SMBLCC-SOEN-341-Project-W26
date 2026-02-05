@@ -42,8 +42,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* clerk header from setup online*/}
+        <nav className="flex justify-between items-center w-full px-8 py-4 bg-brand-sage text-white shadow-md">
+            {/* Show the sign-in and sign-up buttons when the user is signed out */}
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            {/* Show the user button when the user is signed in */}
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </nav>
         {children}
-        <Toaster />
       </body>
     </html>
     </ClerkProvider>

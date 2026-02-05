@@ -290,7 +290,7 @@ export function Dashboard() {
                       className="h-2 rounded-full"
                       style={{
                         width: "69%",
-                        backgroundColor: "var(--lilac-purple)",
+                        backgroundColor: "var(--lilac-purple)", 
                       }}
                     />
                   </div>
