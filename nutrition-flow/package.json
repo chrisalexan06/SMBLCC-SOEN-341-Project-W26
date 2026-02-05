@@ -68,7 +68,7 @@
     "vaul": "1.1.2"
   },
   "devDependencies": {
-    "@prisma/client": "^5.19.0",
+    "@prisma/client": "^5.22.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -76,7 +76,7 @@
     "@vitejs/plugin-react": "4.7.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
-    "prisma": "^5.19.0",
+    "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
