@@ -35,6 +35,7 @@ export default function SignupPage() {
         emailAddress: email,
         password,
       });
+      console.log("SIGNUP RESULT:", result);
 
       
       await setActive({ session: result.createdSessionId });
@@ -87,6 +88,9 @@ export default function SignupPage() {
           )}
 
           <form className="space-y-4" onSubmit={handleSignup}>
+            {/* added this to fix the invisble captcha error because clerk needs it for the sign up process , we can remove it later from clerk properties to see */}
+            <div id="clerk-captcha"></div>
+
             <div className="space-y-2">
               <label className="text-sm font-medium">Email</label>
               <input
@@ -148,7 +152,7 @@ export default function SignupPage() {
               className="text-sm underline text-gray-600"
             >
               Sign out
-</button>
+            </button>
 
             
           </div>
