@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/app/components/ui/button";
 import { useClerk } from "@clerk/nextjs";
+import { Check } from "lucide-react";
 
 
 export default function SignupPage() {
@@ -58,16 +59,35 @@ export default function SignupPage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-white/80 z-10" />
-
-        <div className="relative z-20 text-center">
+        <div className="absolute inset-0 bg-white/90 z-10" />
+<div className="relative z-20 max-w-md">
           <Image
             src="/images/logo1.png"
-            alt="Logo"
+            alt="Nutrition Flow Logo"
             width={405}
             height={405}
             priority
           />
+          <div className="mt-12 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#C8B5D9]">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+              <p className="text-lg">Track your meals and calories</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#C8B5D9]">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+              <p className="text-lg">Share food photos with friends</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-[#C8B5D9]">
+                <Check className="w-4 h-4 text-white" />
+              </div>
+              <p className="text-lg">Discover nearby restaurants</p>
+            </div>
+          </div>
         </div>
       </div>
 
