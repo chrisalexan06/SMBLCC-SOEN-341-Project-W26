@@ -34,7 +34,7 @@ export function Login() {
 
       //if sign in is complete, set active session and redirect to dashboard
       if (result?.status === "complete") {
-        await setActive?({ session: result.createdSessionId }):
+        await setActive?.({ session: result.createdSessionId });
         router.push("/dashboard");
       }
     } catch (err: any) {

@@ -52,6 +52,8 @@ export default function OnboardingPage() {
         body: JSON.stringify({
           userId: user.id, //  Clerk user ID or else does not let the sign in happen
           email: user.emailAddresses[0]?.emailAddress,
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
           ...formData,
           allergies: allergyArray,
         }),
