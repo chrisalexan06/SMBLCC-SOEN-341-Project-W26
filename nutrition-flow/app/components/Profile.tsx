@@ -1,5 +1,12 @@
 "use client";
 
+import { 
+  ClerkProvider, 
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton, } from '@clerk/nextjs';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/app/components/ui/card";
@@ -38,14 +45,15 @@ export function Profile() {
               NutriFlow - Profile Settings
             </h1>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-10 h-10"
-            style={{ backgroundColor: "var(--lilac-purple-light)" }}
-          >
-            <User className="w-5 h-5" />
-          </Button>
+          <div>
+                    <SignedOut>
+                    <SignInButton />
+                    </SignedOut>
+                    {/* Show the user button when the user is signed in */}
+                    <SignedIn>
+                    <UserButton />
+                    </SignedIn>
+                  </div>
         </div>
       </header>
 

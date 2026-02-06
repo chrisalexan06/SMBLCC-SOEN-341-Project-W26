@@ -1,6 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/app/components/ui/button";
+import { 
+  ClerkProvider, 
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton, } from '@clerk/nextjs';
 
 export default function Home() {
   return (
@@ -29,9 +36,13 @@ export default function Home() {
           />
         </div>
         <div>
-          <Link href="/login" className="text-sm font-large text-white hover:text-gray-400">
-            Login
-          </Link>
+          <SignedOut>
+          <SignInButton />
+          </SignedOut>
+          {/* Show the user button when the user is signed in */}
+          <SignedIn>
+          <UserButton />
+          </SignedIn>
         </div>
       </nav>
 
