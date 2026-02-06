@@ -62,8 +62,16 @@ export function Login() {
   return (
     <div className="flex h-screen">
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-1/3 flex-col justify-center items-center p-12" style={{ backgroundColor: 'var(--white)' }}>
-        <div className="max-w-md">
+      <div className="hidden lg:flex lg:w-1/3 relative flex-col justify-center items-center p-12 overflow-hidden">
+        <Image
+          src="/images/meals.webp"
+          alt="Background"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-white/90 z-10" />
+        <div className="relative z-20 max-w-md">
           <Image
             src="/images/logo1.png"
             alt="Nutrition Flow Logo"

@@ -100,7 +100,6 @@ export default function OnboardingPage() {
             priority
           />
         </div>
-
       </div>
 
       
