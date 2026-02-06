@@ -2,18 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";  // get logging in user info
 import Image from "next/image";
 import { Button } from "@/app/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "sonner"; // for pop-up notifications
 import { Check } from "lucide-react";
 
 export default function OnboardingPage() {
-  const router = useRouter();
-  const { user } = useUser();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter(); // Redirect the user to other pages
+  const { user } = useUser(); //Access the current logged in user from Clerk
+  const [isLoading, setIsLoading] = useState(false); //Track if database is currently saving data
 
-  
+  //Memory storage for all form inputs
   const [formData, setFormData] = useState({
     age: "",
     height: "",
@@ -24,12 +24,12 @@ export default function OnboardingPage() {
     dietaryType: "",
     allergies: "",
   });
-
+  // Updates formData every time a user types or picks an option
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-
+// When user clicks "Finish Setup", this function sends formData to the backend to be saved in the database
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -47,7 +47,7 @@ export default function OnboardingPage() {
         ? [] 
         : allergyInput.split(",").map((item) => item.trim()).filter(Boolean);
 
-      const res = await fetch("/api/onboarding", {
+      const res = await fetch("/api/onboarding", {  //Send formData to backend API 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
