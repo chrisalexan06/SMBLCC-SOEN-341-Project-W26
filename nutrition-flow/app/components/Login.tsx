@@ -19,11 +19,11 @@ export function Login() {
     e.preventDefault();
     setError("");
     
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/*    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address.");
       return; //stop if email is invalid
-}
+}*/
 
     try {
       //attempt to sign in with email and password
@@ -38,8 +38,16 @@ export function Login() {
         router.push("/dashboard");
       }
     } catch (err: any) {
-      setError(err.errors?.[0]?.message || "Invalid email or password");
-      console.error("Error:", err);
+      console.error("Error:", err?.errors?.[0]?.code);
+
+      const errCode = err?.errors?.[0]?.code;
+      let errMsg = err?.errors?.[0]?.message || "Invalid email or password";
+
+      if (errCode === "form_identifier_not_found") {
+        errMsg = "No account found with this email. Please sign up first.";
+      } else errMsg = "Please enter a valid email address.";
+
+      setError(errMsg || "Invalid email or password");
     }
   };
 
