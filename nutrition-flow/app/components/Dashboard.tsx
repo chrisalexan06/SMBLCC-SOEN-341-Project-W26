@@ -6,6 +6,7 @@ import { Button } from "@/app/components/ui/button";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Heart, MessageCircle, MapPin, User, Settings, Calendar, Plus } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
+import Image from "next/image";
 import { ChefHat } from "lucide-react";
 
 const calorieData = [
@@ -107,9 +108,13 @@ export function Dashboard() {
       {/* Header */}
       <header className="bg-white border-b px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl" style={{ color: "var(--sage-green-dark)" }}>
-            NutriFlow
-          </h1>
+           <Image
+            src="/images/logo1.png"
+            alt="NutriFlow Logo"
+            width={225}
+            height={125}
+            priority
+          />
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
