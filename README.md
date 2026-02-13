@@ -1,3 +1,5 @@
+## Introduction
+Christina Alexandrakis (40316572) Software Engineer, Lea Saad (40311764) Software Engineer, Bianca Ignat (40316712)  Software Engineer, Sarah Tannous (40311155) Software Engineer, Celina Younes (40311157) Software Engineer, Mohamed Salah (40315595) Software Engineer
 ## Problem Statement
 Maintaining a healthy lifestyle often involves tracking macros and managing recipes, but this can quickly become overwhelming. Without a unified solution, users are left juggling multiple apps and manual calculations, making it harder to stay consistent with their health goals. Common challenges include:
 - Difficulty tracking which foods provide specific nutritional benefits
