@@ -8,7 +8,7 @@ Maintaining a healthy lifestyle often involves tracking macros and managing reci
 
 ## About NutriFlow
 NutriFlow is a web application designed to help students plan meals, manage recipes, and track healthy eating habits with ease.
-#Core Features:
+# Core Features:
 
 ### Weekly Meal Planner:
 - Visual weekly calendar displaying planned meals
