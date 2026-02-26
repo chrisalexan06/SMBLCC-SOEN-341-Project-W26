@@ -151,8 +151,7 @@ export function Dashboard() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                size="sm"
-                onClick={() => setIsAddRecipeOpen(true)}
+                size="sm"                onClick={() => setIsAddRecipeOpen(true)}
                 style={{ borderColor: "var(--sage-green)", color: "var(--sage-green-dark)" }}
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -160,8 +159,7 @@ export function Dashboard() {
               </Button>
               <Button
                 variant="outline"
-                size="sm"
-                style={{ borderColor: "var(--sage-green)", color: "var(--sage-green-dark)" }}
+                size="sm"                style={{ borderColor: "var(--sage-green)", color: "var(--sage-green-dark)" }}
               >
                 Plan Week
               </Button>
@@ -451,9 +449,8 @@ export function Dashboard() {
         </div>
       </main>
 
-      {/* Add Recipe Dialog */}
       <Dialog open={isAddRecipeOpen} onOpenChange={setIsAddRecipeOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Your Recipe</DialogTitle>
           </DialogHeader>
