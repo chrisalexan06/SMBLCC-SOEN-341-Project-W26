@@ -443,6 +443,8 @@ export function Dashboard() {
                 </div>
               </div>
             </Card>
+
+            {/* Nearby Places - Right Column */}
           </div>
         </div>
       </main>
