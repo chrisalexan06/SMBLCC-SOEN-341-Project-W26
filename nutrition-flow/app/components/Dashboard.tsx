@@ -1,13 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Heart, MessageCircle, MapPin, User, Settings, Calendar, Plus } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import Image from "next/image";
 import { ChefHat } from "lucide-react";
+import { AddRecipePlaceholder } from "@/app/components/AddRecipePlaceholder";
 
 const calorieData = [
   { name: "Consumed", value: 1650 },
@@ -98,6 +101,7 @@ const savedRecipes = [
 
 export function Dashboard() {
   const router = useRouter();
+  const [isAddRecipeOpen, setIsAddRecipeOpen] = useState(false);
   const totalCalories = 2000;
   const consumedCalories = 1650;
   const percentage = Math.round((consumedCalories / totalCalories) * 100);
@@ -145,6 +149,15 @@ export function Dashboard() {
               <h2>Weekly Meal Plan</h2>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsAddRecipeOpen(true)}
+                style={{ borderColor: "var(--sage-green)", color: "var(--sage-green-dark)" }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Recipe
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -432,9 +445,21 @@ export function Dashboard() {
                 </div>
               </div>
             </Card>
+
+            {/* Nearby Places - Right Column */}
           </div>
         </div>
       </main>
+
+      {/* Add Recipe Dialog */}
+      <Dialog open={isAddRecipeOpen} onOpenChange={setIsAddRecipeOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Your Recipe</DialogTitle>
+          </DialogHeader>
+          <AddRecipePlaceholder />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
