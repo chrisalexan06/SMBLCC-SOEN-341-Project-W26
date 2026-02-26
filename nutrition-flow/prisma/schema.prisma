@@ -34,6 +34,17 @@ enum DietaryType {
   PESCATARIAN
 }
 
+enum Allergy {
+  DAIRY
+  EGGS
+  PEANUTS
+  TREE_NUTS
+  SHELLFISH
+  GLUTEN
+  SOY
+  OTHER
+}
+
 enum Difficulty {
   EASY      // 1-5 steps
   MEDIUM    // 6-10 steps
@@ -60,8 +71,6 @@ model User {
   firstName     String   
   lastName      String
   
-   
-  
   age           Int
   currentWeight Float
   targetWeight  Float?
@@ -70,7 +79,7 @@ model User {
   // Enums 
   activityLevel ActivityLevel? 
   goal          Goal?          
-  dietaryType DietaryType[] @default([])  
+  dietaryType   DietaryType[] @default([])  
 
   allergies     Allergy[] @default([])
 
@@ -138,4 +147,3 @@ model Ingredient {
   
   createdAt  DateTime @default(now())
 }
-
