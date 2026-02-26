@@ -38,7 +38,7 @@ export default function RootLayout({
       afterSignInUrl="/dashboard"
       afterSignUpUrl="/dashboard"
     >
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
