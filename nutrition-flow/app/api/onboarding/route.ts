@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const lastName = user.lastName || "User";
     const email = user.emailAddresses[0]?.emailAddress || "no-email@example.com";
 
-    //to avoid mandatory field issues, if a user excists we update them, if not we just create one
+    //to avoid mandatory field issues, if a user exists we update them, if not we just create one
     const savedUser = await prisma.user.upsert({
       where: { 
         id: user.id 
