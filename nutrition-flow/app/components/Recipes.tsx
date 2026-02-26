@@ -66,10 +66,10 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               <Card key={recipe.id} className="overflow-hidden rounded-2xl hover:shadow-lg transition-shadow bg-white flex flex-col">
                 
                 {/* IMAGE: Only shows the picture if the user actually uploaded one */}
-                {recipe.image && (
+                {recipe.imageUrl && (
                   <div className="relative w-full h-48 overflow-hidden rounded-t-2xl">
                     <img 
-                      src={recipe.image} 
+                      src={recipe.imageUrl} 
                       alt={recipe.name} 
                       className="w-full h-full object-cover"
                     />
@@ -109,11 +109,11 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                   <div className="flex items-center gap-4 mb-6 text-sm text-gray-500 font-medium">
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-4 h-4" />
-                      <span>{recipe.time || "0"} min</span>
+                      <span>{recipe.prepTimeMinutes || "0"} min</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Flame className="w-4 h-4 text-orange-400" />
-                      <span>{recipe.calories || "0"} kcal</span>
+                      <span>{recipe.estimatedCalories || "0"} kcal</span>
                     </div>
                   </div>
 
