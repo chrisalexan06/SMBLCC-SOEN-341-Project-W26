@@ -100,7 +100,7 @@ export function AddRecipePlaceholder() {
         setEstimatedCost(0);
         setIngredients([{ name: "", amount: "", unit: "G" }]);
         setSubmitted(false);
-      }, 2000);
+      }, 4000);
     } catch (err) {
       console.error(err);
       alert("There was an error saving the recipe.");
@@ -120,10 +120,10 @@ export function AddRecipePlaceholder() {
           style={{ backgroundColor: "var(--sage-green-light)" }}
         >
           <div className="text-sm font-semibold" style={{ color: "var(--sage-green-dark)" }}>
-            ✓ Recipe saved!
+            Recipe saved!
           </div>
           <div className="text-xs text-muted-foreground mt-1">
-            Backend integration coming soon
+            Check your recipe list to see it.
           </div>
         </div>
       ) : (
