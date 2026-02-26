@@ -33,6 +33,23 @@ enum DietaryType {
   PESCATARIAN
 }
 
+enum Difficulty {
+  EASY      // 1-5 steps
+  MEDIUM    // 6-10 steps
+  HARD      // 11+ steps
+}
+
+enum Unit {
+  G         // grams
+  ML        // milliliters
+  L         // liters
+  OZ        // ounces
+  CUP       // cups
+  TBSP      // tablespoons
+  TSP       // teaspoons
+  COUNT     // individual items
+}
+
 // Model
 
 model User {
@@ -57,6 +74,7 @@ model User {
   allergies     String[]  // default is empty array [] automatically
 
   meals         Meal[]
+  recipes       Recipe[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -79,3 +97,44 @@ model Meal {
   
   createdAt DateTime @default(now())
 }
+
+//SCHEMA
+
+model Recipe {
+  id                 String         @id @default(uuid())
+  name               String
+  description        String?
+  imageUrl           String?
+  
+  // Ingredients with amounts and units
+  ingredients        Ingredient[]
+  
+  // Preparation details
+  prepTimeMinutes    Int            // preparation time in minutes
+  prepSteps          String[]       // ordered list of preparation steps
+  
+  // Nutritional and cost info
+  difficulty         Difficulty
+  estimatedCalories  Int?           // total calories for the recipe
+  estimatedCost      Float?         // cost estimation in currency units
+  
+  // Relationships
+  userId             String
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+model Ingredient {
+  id         String   @id @default(uuid())
+  name       String
+  amount     Float
+  unit       Unit
+  
+  recipeId   String
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  createdAt  DateTime @default(now())
+}
+
