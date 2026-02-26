@@ -21,8 +21,8 @@ export default function OnboardingPage() {
     targetWeight: "", 
     activityLevel: "",
     goal: "",
-    dietaryType: "",
-    allergies: "",
+    dietaryType: [] as string[],
+    allergies: [] as string[],
   });
   // Updates formData every time a user types or picks an option
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -42,10 +42,7 @@ export default function OnboardingPage() {
 
     try {
       // Database: Handle "none" or blank as an empty array []
-      const allergyInput = formData.allergies.toLowerCase().trim();
-      const allergyArray = (allergyInput === "" || allergyInput === "none") 
-        ? [] 
-        : allergyInput.split(",").map((item) => item.trim()).filter(Boolean);
+      const allergyArray = formData.allergies.includes("NONE") ? [] : formData.allergies;
 
       const res = await fetch("/api/onboarding", {  //Send formData to backend API 
         method: "POST",
@@ -224,33 +221,499 @@ export default function OnboardingPage() {
               </select>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Dietary Preference *</label>
-              <select name="dietaryType" required value={formData.dietaryType} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border bg-white" style={{ borderColor: 'var(--border)' }}>
-                <option value="" disabled>Select diet</option>
-                <option value="NONE">None</option>
-                <option value="VEGAN">Vegan</option>
-                <option value="VEGETARIAN">Vegetarian</option>
-                <option value="KETO">Keto</option>
-                <option value="HALAL">Halal</option>
-                <option value="GLUTEN_FREE">Gluten Free</option>
-                <option value="PESCATARIAN">Pescatarian</option>
-              </select>
-            </div>
+            <div className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--border)" }}>
+  <div className="mb-3">
+    <label className="text-sm font-medium">Dietary Preferences *</label>
+    <p className="text-xs text-muted-foreground">Select one or more</p>
+  </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Allergies * (Write "None" if none)</label>
-              <input
-                type="text"
-                name="allergies"
-                required
-                value={formData.allergies}
-                onChange={handleChange}
-                placeholder="e.g. Peanuts, none"
-                className="w-full px-4 py-3 rounded-lg border bg-white"
-                style={{ borderColor: 'var(--border)' }}
-              />
-            </div>
+  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+    {/* None (exclusive) */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.dietaryType.includes("NONE")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            dietaryType: checked ? ["NONE"] : [],
+          }));
+        }}
+      />
+      <div
+        className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+                   peer-checked:text-white
+                   peer-checked:[background-color:var(--sage-green)]
+                   peer-checked:[border-color:var(--sage-green)]"
+      >
+        None
+      </div>
+    </label>
+
+    {/* Vegan */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.dietaryType.includes("VEGAN")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            dietaryType: checked
+              ? [...prev.dietaryType.filter((v) => v !== "NONE"), "VEGAN"]
+              : prev.dietaryType.filter((v) => v !== "VEGAN"),
+          }));
+        }}
+      />
+      <div
+        className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+                   peer-checked:text-white
+                   peer-checked:[background-color:var(--sage-green)]
+                   peer-checked:[border-color:var(--sage-green)]"
+      >
+        Vegan
+      </div>
+    </label>
+
+    {/* Vegetarian */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.dietaryType.includes("VEGETARIAN")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            dietaryType: checked
+              ? [...prev.dietaryType.filter((v) => v !== "NONE"), "VEGETARIAN"]
+              : prev.dietaryType.filter((v) => v !== "VEGETARIAN"),
+          }));
+        }}
+      />
+      <div
+        className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+                   peer-checked:text-white
+                   peer-checked:[background-color:var(--sage-green)]
+                   peer-checked:[border-color:var(--sage-green)]"
+      >
+        Vegetarian
+      </div>
+    </label>
+
+    {/* Keto */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.dietaryType.includes("KETO")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            dietaryType: checked
+              ? [...prev.dietaryType.filter((v) => v !== "NONE"), "KETO"]
+              : prev.dietaryType.filter((v) => v !== "KETO"),
+          }));
+        }}
+      />
+      <div
+        className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+                   peer-checked:text-white
+                   peer-checked:[background-color:var(--sage-green)]
+                   peer-checked:[border-color:var(--sage-green)]"
+      >
+        Keto
+      </div>
+    </label>
+
+    {/* Halal */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.dietaryType.includes("HALAL")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            dietaryType: checked
+              ? [...prev.dietaryType.filter((v) => v !== "NONE"), "HALAL"]
+              : prev.dietaryType.filter((v) => v !== "HALAL"),
+          }));
+        }}
+      />
+      <div
+        className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+                   peer-checked:text-white
+                   peer-checked:[background-color:var(--sage-green)]
+                   peer-checked:[border-color:var(--sage-green)]"
+      >
+        Halal
+      </div>
+    </label>
+
+    {/* Kosher */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.dietaryType.includes("KOSHER")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            dietaryType: checked
+              ? [...prev.dietaryType.filter((v) => v !== "NONE"), "KOSHER"]
+              : prev.dietaryType.filter((v) => v !== "KOSHER"),
+          }));
+        }}
+      />
+      <div
+        className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+                   peer-checked:text-white
+                   peer-checked:[background-color:var(--sage-green)]
+                   peer-checked:[border-color:var(--sage-green)]"
+      >
+        Kosher
+      </div>
+    </label>
+
+    {/* Gluten Free */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.dietaryType.includes("GLUTEN_FREE")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            dietaryType: checked
+              ? [...prev.dietaryType.filter((v) => v !== "NONE"), "GLUTEN_FREE"]
+              : prev.dietaryType.filter((v) => v !== "GLUTEN_FREE"),
+          }));
+        }}
+      />
+      <div
+        className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+                   peer-checked:text-white
+                   peer-checked:[background-color:var(--sage-green)]
+                   peer-checked:[border-color:var(--sage-green)]"
+      >
+        Gluten Free
+      </div>
+    </label>
+
+    {/* Pescatarian */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.dietaryType.includes("PESCATARIAN")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            dietaryType: checked
+              ? [...prev.dietaryType.filter((v) => v !== "NONE"), "PESCATARIAN"]
+              : prev.dietaryType.filter((v) => v !== "PESCATARIAN"),
+          }));
+        }}
+      />
+      <div
+        className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+                   peer-checked:text-white
+                   peer-checked:[background-color:var(--sage-green)]
+                   peer-checked:[border-color:var(--sage-green)]"
+      >
+        Pescatarian
+      </div>
+    </label>
+  </div>
+
+  <p className="mt-3 text-xs text-muted-foreground">
+    Selected: {formData.dietaryType.includes("NONE") ? 0 : formData.dietaryType.length}
+  </p>
+</div>
+
+           <div className="rounded-xl border bg-white p-4" style={{ borderColor: "var(--border)" }}>
+  <div className="mb-3">
+    <label className="text-sm font-medium">Allergies *</label>
+    <p className="text-xs text-muted-foreground">Select one or more</p>
+  </div>
+
+  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+    {/* None (exclusive) */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("NONE")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked ? ["NONE"] : [],
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        None
+      </div>
+    </label>
+
+    {/* Peanuts */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("PEANUTS")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "PEANUTS"]
+              : prev.allergies.filter((v) => v !== "PEANUTS"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Peanuts
+      </div>
+    </label>
+
+    {/* Tree nuts */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("TREE_NUTS")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "TREE_NUTS"]
+              : prev.allergies.filter((v) => v !== "TREE_NUTS"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Tree nuts
+      </div>
+    </label>
+
+    {/* Milk */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("MILK")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "MILK"]
+              : prev.allergies.filter((v) => v !== "MILK"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Milk
+      </div>
+    </label>
+
+    {/* Eggs */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("EGGS")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "EGGS"]
+              : prev.allergies.filter((v) => v !== "EGGS"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Eggs
+      </div>
+    </label>
+
+    {/* Wheat */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("WHEAT")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "WHEAT"]
+              : prev.allergies.filter((v) => v !== "WHEAT"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Wheat
+      </div>
+    </label>
+
+    {/* Soy */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("SOY")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "SOY"]
+              : prev.allergies.filter((v) => v !== "SOY"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Soy
+      </div>
+    </label>
+
+    {/* Fish */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("FISH")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "FISH"]
+              : prev.allergies.filter((v) => v !== "FISH"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Fish
+      </div>
+    </label>
+
+    {/* Shellfish */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("SHELLFISH")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "SHELLFISH"]
+              : prev.allergies.filter((v) => v !== "SHELLFISH"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Shellfish
+      </div>
+    </label>
+
+    {/* Sesame */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("SESAME")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "SESAME"]
+              : prev.allergies.filter((v) => v !== "SESAME"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Sesame
+      </div>
+    </label>
+
+    {/* Gluten */}
+    <label className="cursor-pointer">
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={formData.allergies.includes("GLUTEN")}
+        onChange={(e) => {
+          const checked = e.target.checked;
+          setFormData((prev) => ({
+            ...prev,
+            allergies: checked
+              ? [...prev.allergies.filter((v) => v !== "NONE"), "GLUTEN"]
+              : prev.allergies.filter((v) => v !== "GLUTEN"),
+          }));
+        }}
+      />
+      <div className="rounded-full border px-3 py-2 text-sm text-center transition hover:bg-gray-50
+             peer-checked:text-white
+             peer-checked:[background-color:var(--sage-green)]
+             peer-checked:[border-color:var(--sage-green)]">
+        Gluten
+      </div>
+    </label>
+  </div>
+
+  <p className="mt-3 text-xs text-muted-foreground">
+    Selected: {formData.allergies.includes("NONE") ? 0 : formData.allergies.length}
+  </p>
+</div>
 
             <Button
               type="submit"

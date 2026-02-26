@@ -30,7 +30,22 @@ enum DietaryType {
   KETO
   HALAL
   GLUTEN_FREE
+  KOSHER
   PESCATARIAN
+}
+
+enum Allergy {
+  NONE
+  PEANUTS
+  TREE_NUTS
+  MILK
+  EGGS
+  WHEAT
+  SOY
+  FISH
+  SHELLFISH
+  SESAME
+  GLUTEN
 }
 
 // Model
@@ -52,9 +67,9 @@ model User {
   // Enums 
   activityLevel ActivityLevel? 
   goal          Goal?          
-  dietaryType   DietaryType?   
+  dietaryType DietaryType[] @default([])  
 
-  allergies     String[]  // default is empty array [] automatically
+  allergies     Allergy[] @default([])
 
   meals         Meal[]
 
