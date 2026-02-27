@@ -180,6 +180,7 @@ export function Login() {
                 />
               </div>
               <Button
+                name="bob"
                 type="submit"
                 className="w-full h-12 text-white"
                 style={{ backgroundColor: 'var(--sage-green)' }}
