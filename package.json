@@ -6,7 +6,8 @@
   "scripts": {
     "test": "ts-node --prefix nutrition-flow run test",
     "build": "npm --prefix nutrition-flow run build",
-    "start": "npm --prefix nutrition-flow run start"
+    "start": "npm --prefix nutrition-flow run start",
+    "install": "npm --prefix nutrition-flow run install"
   },
   "repository": {
     "type": "git",
