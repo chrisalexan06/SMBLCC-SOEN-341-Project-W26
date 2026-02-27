@@ -4,7 +4,8 @@
   "description": "Christina Alexandrakis (40316572) Software Engineer, Lea Saad (40311764) Software Engineer, Bianca Ignat (40316712)  Software Engineer, Sarah Tannous (40311155) Software Engineer, Celina Younes (40311157) Software Engineer, Mohamed Salah (40315595) Software Engineer\r ## Problem Statement\r Maintaining a healthy lifestyle often involves tracking macros and managing recipes, but this can quickly become overwhelming. Without a unified solution, users are left juggling multiple apps and manual calculations, making it harder to stay consistent with their health goals. Common challenges include:\r - Difficulty tracking which foods provide specific nutritional benefits\r - Struggling to find recipes that are both healthy and enjoyable\r - Lack of a centralized platform to manage weekly meal goals, recipes, and nutrition statistics",
   "main": "index.js",
   "scripts": {
-    "test": "playwright"
+    "test": "playwright",
+    "build": "npm --prefix nutrition-flow run build"
   },
   "repository": {
     "type": "git",
