@@ -36,12 +36,16 @@ enum DietaryType {
 
 enum Allergy {
   DAIRY
+  MILK
   EGGS
   PEANUTS
   TREE_NUTS
+  FISH
   SHELLFISH
+  WHEAT
   GLUTEN
   SOY
+  SESAME
   OTHER
 }
 
@@ -127,6 +131,8 @@ model Recipe {
   difficulty         Difficulty
   estimatedCalories  Int?           // total calories for the recipe
   estimatedCost      Float?         // cost estimation in currency units
+
+  dietaryTags        DietaryType[]  @default([]) 
   
   // Relationships
   userId             String

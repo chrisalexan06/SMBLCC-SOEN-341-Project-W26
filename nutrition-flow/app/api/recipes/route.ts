@@ -21,6 +21,7 @@ export async function POST(req: Request) {
       estimatedCalories,
       estimatedCost,
       ingredients,
+      dietaryTags,
     } = data;
 
     const recipe = await prisma.recipe.create({
@@ -33,6 +34,7 @@ export async function POST(req: Request) {
         difficulty,
         estimatedCalories,
         estimatedCost,
+        dietaryTags: dietaryTags || [],
         userId: userId, // Save the Clerk ID
         ingredients: {
           create: (ingredients || [])
@@ -72,6 +74,7 @@ export async function PUT(req: Request) {
       estimatedCalories,
       estimatedCost,
       ingredients,
+      dietaryTags,
     } = data;
 
     // Verify the recipe belongs to the user
@@ -100,6 +103,7 @@ export async function PUT(req: Request) {
         difficulty,
         estimatedCalories,
         estimatedCost,
+        dietaryTags: dietaryTags || [],
       },
     });
 
