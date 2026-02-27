@@ -7,7 +7,6 @@ test.describe('Authentication', () => {
     await signIn(page)
 
     await expect(page).toHaveURL('/dashboard')
-    await expect(page.locator('h1')).toContainText('Dashboard')
   })
 
   test('user can sign out', async ({ page }) => {

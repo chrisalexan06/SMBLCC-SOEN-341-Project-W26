@@ -24,5 +24,10 @@ export default defineConfig({
     command: 'npm run start',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+    env: {
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!,
+      CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY!,
+    }
   },
 })

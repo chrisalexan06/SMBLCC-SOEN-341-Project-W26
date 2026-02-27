@@ -11,7 +11,7 @@ export async function signIn(page: Page) {
   // Wait for redirect to dashboard, check which page it stays at, it does not get to dashboard
   await page.waitForURL('/dashboard', { timeout: 60000 }).catch(async () => {
     console.log('Current URL:', page.url())
-    console.log('Page content:', await page.content())
+  
     throw new Error(`Login failed, stuck at: ${page.url()}`)
     })
 }
