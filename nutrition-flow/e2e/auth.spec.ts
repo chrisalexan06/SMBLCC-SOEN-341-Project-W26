@@ -5,6 +5,7 @@ import { signIn, signOut } from './helpers/auth'
 test.describe('Authentication', () => {
   test('user can sign in and access dashboard', async ({ page }) => {
     await signIn(page)
+
     await expect(page).toHaveURL('/dashboard')
     await expect(page.locator('h1')).toContainText('Dashboard')
   })
