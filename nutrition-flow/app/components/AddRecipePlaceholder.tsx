@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
+import { Checkbox } from "@/app/components/ui/checkbox";
 import { Plus, X } from "lucide-react";
 
 interface IngredientInput {
@@ -24,6 +25,7 @@ export function AddRecipePlaceholder() {
   const [ingredients, setIngredients] = useState<IngredientInput[]>([
     { name: "", amount: "", unit: "G" },
   ]);
+  const [dietaryTags, setDietaryTags] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
   const handleIngredientChange = (index: number, field: keyof IngredientInput, value: string) => {
@@ -83,6 +85,7 @@ export function AddRecipePlaceholder() {
           estimatedCalories,
           estimatedCost,
           ingredients: filledIngredients,
+          dietaryTags,
         }),
       });
       if (!res.ok) throw new Error("Failed to save recipe");
@@ -99,6 +102,7 @@ export function AddRecipePlaceholder() {
         setEstimatedCalories(0);
         setEstimatedCost(0);
         setIngredients([{ name: "", amount: "", unit: "G" }]);
+        setDietaryTags([]);
         setSubmitted(false);
       }, 4000);
     } catch (err) {
@@ -299,6 +303,34 @@ export function AddRecipePlaceholder() {
                 onChange={(e) => setEstimatedCost(Number(e.target.value))}
                 className="rounded-lg"
               />
+            </div>
+          </div>
+
+          {/* Dietary Tags */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">Dietary Tags</label>
+            <div className="grid grid-cols-2 gap-2">
+              {["VEGAN", "VEGETARIAN", "KETO", "HALAL", "GLUTEN_FREE", "KOSHER", "PESCATARIAN"].map((tag) => (
+                <div key={tag} className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`add-${tag}`}
+                    checked={dietaryTags.includes(tag)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setDietaryTags([...dietaryTags, tag]);
+                      } else {
+                        setDietaryTags(dietaryTags.filter((t) => t !== tag));
+                      }
+                    }}
+                  />
+                  <label 
+                    htmlFor={`add-${tag}`} 
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 capitalize"
+                  >
+                    {tag.replace('_', ' ').toLowerCase()}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
 

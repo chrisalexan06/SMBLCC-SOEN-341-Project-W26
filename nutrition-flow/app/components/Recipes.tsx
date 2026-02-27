@@ -42,6 +42,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
     estimatedCalories: 0,
     estimatedCost: 0,
     ingredients: [],
+    dietaryTags: [],
   });
 
   //FILTER LOGIC
@@ -62,6 +63,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
       estimatedCalories: recipe.estimatedCalories || 0,
       estimatedCost: recipe.estimatedCost || 0,
       ingredients: recipe.ingredients || [],
+      dietaryTags: recipe.dietaryTags || [],
     });
     setIsEditDialogOpen(true);
   };
@@ -144,6 +146,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
           estimatedCost: formData.estimatedCost,
           ingredients: formData.ingredients,
           prepSteps: formData.prepSteps,
+          dietaryTags: formData.dietaryTags,
         }),
       });
       if (!response.ok) throw new Error("Failed to update recipe");
@@ -261,6 +264,15 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                     <Badge className={`text-[10px] ${recipe.difficulty === "EASY" ? "bg-green-100 text-green-700" : recipe.difficulty === "MEDIUM" ? "bg-yellow-100 text-yellow-700" : "bg-rose-100 text-rose-700"}`}>
                       {recipe.difficulty}
                     </Badge>
+                  </div>
+                  
+                  {/* Dietary Tags */}
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {recipe.dietaryTags?.map((tag: string) => (
+                      <Badge key={tag} variant="outline" className="text-[10px] text-sage-600 border-sage-200 bg-sage-50">
+                        {tag.replace('_', ' ')}
+                      </Badge>
+                    ))}
                   </div>
 
                   {/* Single Full-Width Button */}
@@ -420,6 +432,35 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               <div>
                 <label className="text-sm font-medium mb-2 block">Cost Estimate</label>
                 <Input type="number" step="0.01" value={formData.estimatedCost} onChange={(e) => handleInputChange("estimatedCost", parseFloat(e.target.value) || 0)} />
+              </div>
+            </div>
+
+            {/* Dietary Tags */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Dietary Tags</label>
+              <div className="grid grid-cols-2 gap-2">
+                {["VEGAN", "VEGETARIAN", "KETO", "HALAL", "GLUTEN_FREE", "KOSHER", "PESCATARIAN"].map((tag) => (
+                  <div key={tag} className="flex items-center space-x-2">
+                    <Checkbox 
+                      id={`edit-${tag}`}
+                      checked={(formData.dietaryTags || []).includes(tag)}
+                      onCheckedChange={(checked) => {
+                        const currentTags = formData.dietaryTags || [];
+                        if (checked) {
+                           handleInputChange("dietaryTags", [...currentTags, tag]);
+                        } else {
+                           handleInputChange("dietaryTags", currentTags.filter((t: string) => t !== tag));
+                        }
+                      }}
+                    />
+                    <label 
+                      htmlFor={`edit-${tag}`} 
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 capitalize"
+                    >
+                      {tag.replace('_', ' ').toLowerCase()}
+                    </label>
+                  </div>
+                ))}
               </div>
             </div>
 
