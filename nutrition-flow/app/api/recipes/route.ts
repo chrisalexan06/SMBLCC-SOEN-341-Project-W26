@@ -35,11 +35,13 @@ export async function POST(req: Request) {
         estimatedCost,
         userId: userId, // Save the Clerk ID
         ingredients: {
-          create: ingredients.map((i: any) => ({
-            name: i.name,
-            amount: parseFloat(i.amount) || 0,
-            unit: i.unit,
-          })),
+          create: (ingredients || [])
+            .filter((i: any) => i.name && i.name.trim())
+            .map((i: any) => ({
+              name: i.name,
+              amount: i.amount ? parseFloat(i.amount.toString()) : 0,
+              unit: i.unit || "G",
+            })),
         },
       },
     });
@@ -61,10 +63,10 @@ export async function PUT(req: Request) {
     const data = await req.json();
     const {
       recipeId,
-      recipeName,
+      name,
       description,
       imageUrl,
-      prepTime,
+      prepTimeMinutes,
       prepSteps,
       difficulty,
       estimatedCalories,
@@ -90,10 +92,10 @@ export async function PUT(req: Request) {
     const updatedRecipe = await prisma.recipe.update({
       where: { id: recipeId },
       data: {
-        name: recipeName,
+        name,
         description,
         imageUrl,
-        prepTimeMinutes: prepTime,
+        prepTimeMinutes,
         prepSteps,
         difficulty,
         estimatedCalories,
@@ -107,14 +109,20 @@ export async function PUT(req: Request) {
     });
 
     if (ingredients && ingredients.length > 0) {
-      await prisma.ingredient.createMany({
-        data: ingredients.map((i: any) => ({
+      const ingredientsToCreate = ingredients
+        .filter((i: any) => i.name && i.name.trim())
+        .map((i: any) => ({
           name: i.name,
-          amount: parseFloat(i.amount) || 0,
-          unit: i.unit,
+          amount: i.amount ? parseFloat(i.amount.toString()) : 0,
+          unit: i.unit || "G",
           recipeId,
-        })),
-      });
+        }));
+
+      if (ingredientsToCreate.length > 0) {
+        await prisma.ingredient.createMany({
+          data: ingredientsToCreate,
+        });
+      }
     }
 
     // Fetch updated recipe with ingredients

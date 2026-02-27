@@ -10,7 +10,7 @@ import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Checkbox } from "@/app/components/ui/checkbox";
-import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2, Plus } from "lucide-react"; // Cute icons from lucide
+import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2, Plus, DollarSign } from "lucide-react"; // Cute icons from lucide
 import { toast } from "sonner";
 
 export function Recipes({ recipes }: { recipes: any[] }) {
@@ -258,7 +258,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                       <div className="flex items-center gap-1"><Clock className="w-4 h-4 text-sage-600" /><span>{recipe.prepTimeMinutes}m</span></div>
                       <div className="flex items-center gap-1"><Flame className="w-4 h-4 text-orange-500" /><span>{recipe.estimatedCalories} kcal</span></div>
                     </div>
-                    <Badge className={`text-[10px] ${recipe.difficulty === "EASY" ? "bg-green-100 text-green-700" : "bg-rose-100 text-rose-700"}`}>
+                    <Badge className={`text-[10px] ${recipe.difficulty === "EASY" ? "bg-green-100 text-green-700" : recipe.difficulty === "MEDIUM" ? "bg-yellow-100 text-yellow-700" : "bg-rose-100 text-rose-700"}`}>
                       {recipe.difficulty}
                     </Badge>
                   </div>
@@ -293,9 +293,10 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               
               <p className="text-gray-600 italic border-l-4 border-sage-200 pl-4">{viewingRecipe.description || "No description provided."}</p>
 
-              <div className="grid grid-cols-2 gap-4 py-4 border-y border-gray-100 text-sm font-semibold">
+              <div className="grid grid-cols-3 gap-4 py-4 border-y border-gray-100 text-sm font-semibold">
                 <div className="flex items-center gap-2"><Clock className="text-sage-600"/> {viewingRecipe.prepTimeMinutes} Minutes</div>
                 <div className="flex items-center gap-2"><Flame className="text-orange-500"/> {viewingRecipe.estimatedCalories} Calories</div>
+                <div className="flex items-center gap-2"><DollarSign className="text-sage-600" style={{width: '16px', height: '16px'}}/> ${viewingRecipe.estimatedCost || 0}</div>
               </div>
 
               {/* Ingredients */}

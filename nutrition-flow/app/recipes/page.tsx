@@ -17,6 +17,9 @@ export default async function RecipesPage() {
     where: {
       userId: userId, 
     },
+    include: {
+      ingredients: true,
+    },
     // Optional: Sort by newest first
     orderBy: {
       id: 'desc' 
