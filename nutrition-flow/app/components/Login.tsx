@@ -156,6 +156,7 @@ export function Login() {
               <div>
                 <label className="block mb-2">Email</label>
                 <input
+                  name="identifier"
                   type="email"
                   required
                   value={email}
@@ -168,6 +169,7 @@ export function Login() {
               <div>
                 <label className="block mb-2">Password</label>
                 <input
+                  name="password"
                   type="password"
                   required
                   value={password}
