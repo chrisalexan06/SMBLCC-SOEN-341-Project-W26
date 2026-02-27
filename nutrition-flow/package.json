@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "setup:test": "ts-node ./scripts/setup-test-user.ts",
-    "run:ts": "ts-node scripts/setup-test-user.ts"
+    "run": "ts-node --prefix nutrition-flow run test"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.1",
