@@ -21,7 +21,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/dashboard")}
             >
               <ArrowLeft className="w-5 h-5" />
             </Button>
@@ -34,16 +34,6 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               </h1>
             </div>
           </div>
-
-          {/* "Add Recipe" button to open the creation form */}
-          <Button
-            className="text-white"
-            style={{ backgroundColor: "var(--sage-green)" }}
-            onClick={() => router.push("/recipes/new")}
-          >
-            <Plus className="w-5 h-5 mr-2" />
-            Add Recipe
-          </Button>
         </div>
       </header>
 
