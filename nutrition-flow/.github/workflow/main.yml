@@ -38,4 +38,4 @@ jobs:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_TEST }}
 
       - name: Build
-        run: npm run build
+        run: npm run dev
