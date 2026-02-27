@@ -10,7 +10,7 @@ import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Checkbox } from "@/app/components/ui/checkbox";
-import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2 } from "lucide-react"; // Cute icons from lucide
+import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2, Plus } from "lucide-react"; // Cute icons from lucide
 import { toast } from "sonner";
 
 export function Recipes({ recipes }: { recipes: any[] }) {
@@ -21,6 +21,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
 
   //SELECTION STATE
   const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
+  const [deleteSuccessMessage, setDeleteSuccessMessage] = useState<string | null>(null);
 
   //MODAL STATES
   const [editingRecipe, setEditingRecipe] = useState<any>(null);
@@ -104,8 +105,12 @@ export function Recipes({ recipes }: { recipes: any[] }) {
       }
 
       setSelectedRecipes(new Set());
-      toast.success(`Successfully deleted ${selectedRecipes.size} recipe${selectedRecipes.size > 1 ? "s" : ""}`);
-      router.refresh();
+      const count = selectedRecipes.size;
+      setDeleteSuccessMessage(`Successfully deleted ${count} recipe${count > 1 ? "s" : ""}`);
+      setTimeout(() => {
+        setDeleteSuccessMessage(null);
+        router.refresh();
+      }, 2000);
     } catch (error) {
       toast.error("Error deleting recipes. Please try again.");
     } finally {
@@ -128,13 +133,25 @@ export function Recipes({ recipes }: { recipes: any[] }) {
       const response = await fetch("/api/recipes", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ recipeId: editingRecipe.id, ...formData }),
+        body: JSON.stringify({
+          recipeId: editingRecipe.id,
+          name: formData.recipeName,
+          description: formData.description,
+          imageUrl: formData.imageUrl,
+          prepTimeMinutes: formData.prepTime,
+          difficulty: formData.difficulty,
+          estimatedCalories: formData.estimatedCalories,
+          estimatedCost: formData.estimatedCost,
+          ingredients: formData.ingredients,
+          prepSteps: formData.prepSteps,
+        }),
       });
       if (!response.ok) throw new Error("Failed to update recipe");
       setIsEditDialogOpen(false);
+      toast.success("Recipe updated successfully!");
       router.refresh();
     } catch (error) {
-      alert("Error updating recipe. Please try again.");
+      toast.error("Error updating recipe. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -172,7 +189,13 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          {selectedRecipes.size > 0 && (
+          {deleteSuccessMessage ? (
+            <div className="flex items-center gap-3 px-4 py-2 rounded-lg" style={{ backgroundColor: "var(--sage-green-light)" }}>
+              <span className="text-sm font-medium" style={{ color: "var(--sage-green-dark)" }}>
+                ✓ {deleteSuccessMessage}
+              </span>
+            </div>
+          ) : selectedRecipes.size > 0 ? (
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-600">
                 {selectedRecipes.size} selected
@@ -188,7 +211,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                 {isDeleting ? "Deleting..." : "Delete"}
               </Button>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Recipe Grid */}
@@ -313,20 +336,96 @@ export function Recipes({ recipes }: { recipes: any[] }) {
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Edit Recipe</DialogTitle></DialogHeader>
           <div className="space-y-4 pt-4">
-            <div><label className="text-sm font-medium">Recipe Name *</label><Input value={formData.recipeName} onChange={(e) => handleInputChange("recipeName", e.target.value)} /></div>
-            <div><label className="text-sm font-medium">Description</label><Textarea value={formData.description} onChange={(e) => handleInputChange("description", e.target.value)} rows={3} /></div>
+            {/* Recipe Name */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Recipe Name</label>
+              <Input value={formData.recipeName} onChange={(e) => handleInputChange("recipeName", e.target.value)} />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Description</label>
+              <Textarea value={formData.description} onChange={(e) => handleInputChange("description", e.target.value)} rows={2} />
+            </div>
+
+            {/* Image URL */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Image URL</label>
+              <Input value={formData.imageUrl} onChange={(e) => handleInputChange("imageUrl", e.target.value)} placeholder="https://example.com/image.jpg" />
+            </div>
+
+            {/* Prep Time */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Preparation Time (minutes)</label>
+              <Input type="number" value={formData.prepTime} onChange={(e) => handleInputChange("prepTime", parseInt(e.target.value) || 0)} />
+            </div>
+
+            {/* Ingredients */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Ingredients</label>
+              <div className="space-y-2">
+                {(formData.ingredients || []).map((ingredient: any, idx: number) => (
+                  <div key={idx} className="flex gap-2">
+                    <Input type="text" value={ingredient.name || ""} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], name: e.target.value }; handleInputChange("ingredients", updated); }} placeholder="Name" className="flex-1" />
+                    <Input type="text" value={ingredient.amount || ""} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], amount: e.target.value }; handleInputChange("ingredients", updated); }} placeholder="Amount" className="w-24" />
+                    <select value={ingredient.unit || "G"} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], unit: e.target.value }; handleInputChange("ingredients", updated); }} className="w-24 border rounded-lg p-2">
+                      <option value="G">g</option>
+                      <option value="ML">ml</option>
+                      <option value="L">l</option>
+                      <option value="OZ">oz</option>
+                      <option value="CUP">cup</option>
+                      <option value="TBSP">tbsp</option>
+                      <option value="TSP">tsp</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => handleInputChange("ingredients", [...(formData.ingredients || []), { name: "", amount: "", unit: "G" }])} className="mt-2 text-sm flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100" style={{ color: "var(--sage-green)" }}>
+                <Plus className="w-4 h-4" />
+                Add Ingredient
+              </button>
+            </div>
+
+            {/* Preparation Steps */}
+            <div>
+              <label className="text-sm font-medium mb-2 block">Preparation Steps</label>
+              <div className="space-y-2">
+                {(formData.prepSteps || []).map((step: string, idx: number) => (
+                  <div key={idx} className="flex gap-2 items-center">
+                    <span className="text-sm">{idx + 1}.</span>
+                    <Input type="text" value={step} onChange={(e) => { const updated = [...(formData.prepSteps || [])]; updated[idx] = e.target.value; handleInputChange("prepSteps", updated); }} placeholder="Describe step" className="flex-1" />
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => handleInputChange("prepSteps", [...(formData.prepSteps || []), ""])} className="mt-2 text-sm flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100" style={{ color: "var(--sage-green)" }}>
+                <Plus className="w-4 h-4" />
+                Add Step
+              </button>
+            </div>
+
+            {/* Difficulty & Estimates */}
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="text-sm font-medium">Prep Time (min)</label><Input type="number" value={formData.prepTime} onChange={(e) => handleInputChange("prepTime", parseInt(e.target.value) || 0)} /></div>
-              <div><label className="text-sm font-medium">Difficulty</label>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Difficulty</label>
                 <Select value={formData.difficulty} onValueChange={(v) => handleInputChange("difficulty", v)}>
                   <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent><SelectItem value="EASY">Easy</SelectItem><SelectItem value="MEDIUM">Medium</SelectItem><SelectItem value="HARD">Hard</SelectItem></SelectContent>
                 </Select>
               </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Calories Estimate</label>
+                <Input type="number" value={formData.estimatedCalories} onChange={(e) => handleInputChange("estimatedCalories", parseInt(e.target.value) || 0)} />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Cost Estimate</label>
+                <Input type="number" step="0.01" value={formData.estimatedCost} onChange={(e) => handleInputChange("estimatedCost", parseFloat(e.target.value) || 0)} />
+              </div>
             </div>
+
+            {/* Buttons */}
             <div className="flex gap-2 mt-6">
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isLoading} className="flex-1">Cancel</Button>
-              <Button onClick={handleEditSubmit} disabled={isLoading} className="flex-1 text-white bg-sage-500">{isLoading ? "Saving..." : "Save Changes"}</Button>
+              <Button onClick={handleEditSubmit} disabled={isLoading} className="flex-1 text-white" style={{ backgroundColor: "var(--sage-green)" }}>{isLoading ? "Saving..." : "Save Changes"}</Button>
             </div>
           </div>
         </DialogContent>
