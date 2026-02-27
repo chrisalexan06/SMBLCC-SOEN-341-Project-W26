@@ -128,3 +128,47 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const data = await req.json();
+    const { recipeId } = data;
+
+    if (!recipeId) {
+      return NextResponse.json({ error: "Recipe ID is required" }, { status: 400 });
+    }
+
+    // Verify the recipe belongs to the user
+    const existingRecipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    if (!existingRecipe) {
+      return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
+    }
+
+    if (existingRecipe.userId !== userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // Delete ingredients first (due to foreign key constraint)
+    await prisma.ingredient.deleteMany({
+      where: { recipeId },
+    });
+
+    // Delete the recipe
+    await prisma.recipe.delete({
+      where: { id: recipeId },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
