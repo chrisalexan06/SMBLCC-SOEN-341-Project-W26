@@ -152,11 +152,11 @@ export function Login() {
               </div>
             </div>
 
-            <form className="space-y-4" onSubmit={handleEmailLogin}>
+            <form id="login-form" className="space-y-4" onSubmit={handleEmailLogin}>
               <div>
-                <label className="block mb-2">Email</label>
+                <label className="block mb-2">Email
                 <input
-                  name="identifier"
+                  id="identifier"
                   type="email"
                   required
                   value={email}
@@ -164,12 +164,12 @@ export function Login() {
                   placeholder="name@example.com"
                   className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 bg-white"
                   style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--sage-green)' } as React.CSSProperties}
-                />
+                /></label>
               </div>
               <div>
-                <label className="block mb-2">Password</label>
+                <label className="block mb-2">Password
                 <input
-                  name="password"
+                  id="password"
                   type="password"
                   required
                   value={password}
@@ -177,7 +177,7 @@ export function Login() {
                   placeholder="••••••••"
                   className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 bg-white"
                   style={{ borderColor: 'var(--border)', '--tw-ring-color': 'var(--sage-green)' } as React.CSSProperties}
-                />
+                /></label>
               </div>
               <Button
                 name="bob"

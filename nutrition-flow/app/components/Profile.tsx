@@ -46,14 +46,14 @@ export function Profile() {
             </h1>
           </div>
           <div>
-                    <SignedOut>
-                    <SignInButton />
-                    </SignedOut>
-                    {/* Show the user button when the user is signed in */}
-                    <SignedIn>
-                    <UserButton />
-                    </SignedIn>
-                  </div>
+              <SignedOut>
+                <SignInButton />
+              </SignedOut>
+                {/* Show the user button when the user is signed in */}
+                <SignedIn>
+                  <UserButton />
+                </SignedIn>
+            </div>
         </div>
       </header>
 
