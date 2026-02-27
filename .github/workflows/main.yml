@@ -27,7 +27,7 @@ jobs:
         run: npm install 
 
       - name: Update schema
-        run: npx prisma generate
+        run: npx prisma generate --schema=nutrition-flow/prisma/schema.prisma
 
       - name: Install Playwright
         run: npx playwright install --with-deps
