@@ -52,9 +52,27 @@ export function Recipes({ recipes }: { recipes: any[] }) {
   });
 
   //FILTER LOGIC
-  const filteredRecipes = (recipes || []).filter((recipe) =>
-    recipe.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredRecipes = (recipes || []).filter((recipe) => {
+  // Search
+  if (!recipe.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+
+  // Difficulty (your state stores "Easy"/"Medium"/"Hard", DB stores "EASY"/"MEDIUM"/"HARD")
+  if (selectedDifficulty && recipe.difficulty !== selectedDifficulty.toUpperCase()) return false;
+
+  // Time (timeFilter is a string like "30", representing minutes)
+  if (timeFilter && recipe.prepTimeMinutes > parseInt(timeFilter)) return false;
+
+  // Cost
+  if (costFilter && recipe.estimatedCost > parseFloat(costFilter)) return false;
+
+  // Dietary tag (your UI uses "Gluten Free", DB stores "GLUTEN_FREE")
+  if (selectedTag) {
+    const normalizedTag = selectedTag.toUpperCase().replace(" ", "_");
+    if (!recipe.dietaryTags?.includes(normalizedTag)) return false;
+  }
+
+  return true;
+});
 
   //HANDLERS
   const handleEditClick = (recipe: any) => {

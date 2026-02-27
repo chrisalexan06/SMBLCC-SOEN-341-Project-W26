@@ -8,7 +8,66 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// ENUMS
+model User {
+  id            String         @id
+  email         String         @unique
+  firstName     String
+  lastName      String
+  age           Int
+  currentWeight Float
+  targetWeight  Float?
+  height        Float
+  activityLevel ActivityLevel?
+  goal          Goal?
+  dietaryType   DietaryType[]  @default([])
+  allergies     Allergy[]      @default([])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  meals         Meal[]
+  recipes       Recipe[]
+}
+
+model Meal {
+  id        String   @id @default(uuid())
+  name      String
+  imageUrl  String
+  calories  Int?
+  protein   Int?
+  carbs     Int?
+  fats      Int?
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Recipe {
+  id                String        @id @default(uuid())
+  name              String
+  description       String?
+  imageUrl          String?
+  prepTimeMinutes   Int
+  prepSteps         String[]
+  difficulty        Difficulty
+  estimatedCalories Int?
+  estimatedCost     Float?
+  userId            String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  dietaryTags       DietaryType[] @default([])
+  ingredients       Ingredient[]
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Ingredient {
+  id        String   @id @default(uuid())
+  name      String
+  amount    Float
+  unit      Unit
+  recipeId  String
+  createdAt DateTime @default(now())
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
 enum ActivityLevel {
   SEDENTARY
   LIGHT
@@ -36,120 +95,32 @@ enum DietaryType {
 
 enum Allergy {
   DAIRY
-  MILK
   EGGS
   PEANUTS
   TREE_NUTS
-  FISH
   SHELLFISH
-  WHEAT
   GLUTEN
   SOY
-  SESAME
   OTHER
+  MILK
+  FISH
+  WHEAT
+  SESAME
 }
 
 enum Difficulty {
-  EASY      // 1-5 steps
-  MEDIUM    // 6-10 steps
-  HARD      // 11+ steps
+  EASY
+  MEDIUM
+  HARD
 }
 
 enum Unit {
-  G         // grams
-  ML        // milliliters
-  L         // liters
-  OZ        // ounces
-  CUP       // cups
-  TBSP      // tablespoons
-  TSP       // teaspoons
-  COUNT     // individual items
-}
-
-// Model
-
-model User {
-  id            String    @id 
-
-  email         String    @unique
-  firstName     String   
-  lastName      String
-  
-  age           Int
-  currentWeight Float
-  targetWeight  Float?
-  height        Float
-
-  // Enums 
-  activityLevel ActivityLevel? 
-  goal          Goal?          
-  dietaryType   DietaryType[] @default([])  
-
-  allergies     Allergy[] @default([])
-
-  meals         Meal[]
-  recipes       Recipe[]
-
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
-
-model Meal {
-  id        String   @id @default(uuid())
-  
-  name      String
-  imageUrl  String
-  
-  calories  Int?
-  protein   Int?
-  carbs     Int?
-  fats      Int?
-  
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt DateTime @default(now())
-}
-
-//SCHEMA
-
-model Recipe {
-  id                 String         @id @default(uuid())
-  name               String
-  description        String?
-  imageUrl           String?
-  
-  // Ingredients with amounts and units
-  ingredients        Ingredient[]
-  
-  // Preparation details
-  prepTimeMinutes    Int            // preparation time in minutes
-  prepSteps          String[]       // ordered list of preparation steps
-  
-  // Nutritional and cost info
-  difficulty         Difficulty
-  estimatedCalories  Int?           // total calories for the recipe
-  estimatedCost      Float?         // cost estimation in currency units
-
-  dietaryTags        DietaryType[]  @default([]) 
-  
-  // Relationships
-  userId             String
-  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-}
-
-model Ingredient {
-  id         String   @id @default(uuid())
-  name       String
-  amount     Float
-  unit       Unit
-  
-  recipeId   String
-  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
-  createdAt  DateTime @default(now())
+  G
+  ML
+  L
+  OZ
+  CUP
+  TBSP
+  TSP
+  COUNT
 }
