@@ -24,7 +24,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm i
+        run: npm install 
 
       - name: Install Playwright
         run: npx playwright install --with-deps
@@ -33,7 +33,7 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_TEST }}
-          
+
       - name: Run E2E tests
         run: npx playwright test
         env:
