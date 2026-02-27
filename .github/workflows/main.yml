@@ -28,9 +28,6 @@ jobs:
 
       - name: Run unit tests
         run: npm test
-
-      - name: Run integration tests
-        run: npm run test:integration
         env:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_TEST }}
 

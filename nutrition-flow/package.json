@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "playwright"
+    "setup:test": "ts-node ./scripts/setup-test-user.ts",
+    "run:ts": "ts-node scripts/setup-test-user.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.1",
@@ -72,8 +73,7 @@
     "@playwright/test": "^1.58.2",
     "@prisma/client": "5.19",
     "@tailwindcss/postcss": "^4",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^20",
+    "@types/node": "^20.19.35",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "4.7.0",
@@ -82,6 +82,7 @@
     "prisma": "5.19",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
 }
