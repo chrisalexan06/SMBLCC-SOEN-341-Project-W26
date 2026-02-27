@@ -10,7 +10,7 @@ import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Checkbox } from "@/app/components/ui/checkbox";
-import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2, Plus, DollarSign } from "lucide-react"; // Cute icons from lucide
+import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2, Plus, DollarSign, X } from "lucide-react"; // Cute icons from lucide
 import { toast } from "sonner";
 
 export function Recipes({ recipes }: { recipes: any[] }) {
@@ -18,6 +18,12 @@ export function Recipes({ recipes }: { recipes: any[] }) {
 
   //SEARCH STATE
   const [searchQuery, setSearchQuery] = useState("");
+  
+  //FILTER STATE - VISUAL ONLY
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [timeFilter, setTimeFilter] = useState<string | null>(null);
+  const [costFilter, setCostFilter] = useState<string | null>(null);
 
   //SELECTION STATE
   const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
@@ -215,6 +221,120 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               </Button>
             </div>
           ) : null}
+        </div>
+
+        {/* --- FILTERS SECTION --- */}
+        <div className="space-y-4 mb-8">
+          
+          {/* Row 1: Difficulty & Time & Cost */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Filters:</span>
+            
+            {/* Difficulty Slider */}
+            <div className="relative bg-gray-100 rounded-full p-1 flex items-center h-9 w-[220px]">
+              {/* Sliding Background */}
+              <div 
+                className={`absolute top-1 bottom-1 rounded-full transition-all duration-300 shadow-sm ${
+                    !selectedDifficulty ? "hidden" :
+                    selectedDifficulty === "Easy" ? "left-1 w-[68px] bg-green-100 text-green-700 ring-1 ring-green-200" :
+                    selectedDifficulty === "Medium" ? "left-[72px] w-[75px] bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200" :
+                    "left-[152px] w-[64px] bg-red-100 text-red-700 ring-1 ring-red-200"
+                }`}
+              ></div>
+
+              {/* Text Labels */}
+              <button 
+                onClick={() => setSelectedDifficulty(selectedDifficulty === "Easy" ? null : "Easy")}
+                className={`relative z-10 w-[68px] text-[11px] font-medium transition-colors text-center ${selectedDifficulty === "Easy" ? "text-green-800" : "text-gray-500 hover:text-gray-800"}`}
+              >
+                Easy
+              </button>
+              <button 
+                onClick={() => setSelectedDifficulty(selectedDifficulty === "Medium" ? null : "Medium")}
+                className={`relative z-10 w-[75px] text-[11px] font-medium transition-colors text-center ${selectedDifficulty === "Medium" ? "text-yellow-800" : "text-gray-500 hover:text-gray-800"}`}
+              >
+                Medium
+              </button>
+              <button 
+                onClick={() => setSelectedDifficulty(selectedDifficulty === "Hard" ? null : "Hard")}
+                className={`relative z-10 w-[64px] text-[11px] font-medium transition-colors text-center ${selectedDifficulty === "Hard" ? "text-red-800" : "text-gray-500 hover:text-gray-800"}`}
+              >
+                Hard
+              </button>
+            </div>
+
+            <div className="h-6 w-px bg-gray-200 mx-1"></div>
+
+            {/* Time Filter - Dropdown */}
+            <Select value={timeFilter || ""} onValueChange={(v) => setTimeFilter(v === "all" ? null : v)}>
+              <SelectTrigger className={`w-[140px] h-9 text-xs font-medium rounded-lg transition-all ${timeFilter ? "bg-orange-50 text-orange-700 border-orange-200 ring-1 ring-orange-200" : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                <div className="flex items-center gap-2">
+                  <Clock className={`w-3.5 h-3.5 ${timeFilter ? "text-orange-600" : "text-gray-400"}`} />
+                  <SelectValue placeholder="Time Limit" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any Time</SelectItem>
+                <SelectItem value="15">Under 15 mins</SelectItem>
+                <SelectItem value="30">Under 30 mins</SelectItem>
+                <SelectItem value="60">Under 1 hour</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Cost Filter - Dropdown */}
+            <Select value={costFilter || ""} onValueChange={(v) => setCostFilter(v === "all" ? null : v)}>
+              <SelectTrigger className={`w-[140px] h-9 text-xs font-medium rounded-lg transition-all ${costFilter ? "bg-emerald-50 text-emerald-700 border-emerald-200 ring-1 ring-emerald-200" : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                 <div className="flex items-center gap-2">
+                   <DollarSign className={`w-3.5 h-3.5 ${costFilter ? "text-emerald-600" : "text-gray-400"}`} />
+                   <SelectValue placeholder="Max Cost" />
+                 </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Any Price</SelectItem>
+                <SelectItem value="5">Under $5</SelectItem>
+                <SelectItem value="10">Under $10</SelectItem>
+                <SelectItem value="20">Under $20</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Clear Filters (Only shows if something is selected) */}
+            {(selectedDifficulty || selectedTag || timeFilter || costFilter) && (
+              <button 
+                onClick={() => {
+                  setSelectedDifficulty(null);
+                  setSelectedTag(null);
+                  setTimeFilter(null);
+                  setCostFilter(null);
+                }}
+                className="text-xs text-red-400 hover:text-red-600 ml-auto flex items-center gap-1"
+              >
+                <X className="w-3 h-3" /> Clear
+              </button>
+            )}
+          </div>
+
+          {/* Row 2: Dietary Tags (Scrollable) */}
+          <div className="space-y-2 pt-2">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Dietary Preferences:</span>
+            <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide p-1">
+              {["Vegan", "Vegetarian", "Keto", "Halal", "Gluten Free", "Kosher", "Pescatarian"].map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                  className={`
+                    px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 border
+                    ${selectedTag === tag 
+                      ? "text-white border-transparent shadow-md" 
+                      : "bg-white text-gray-600 border-gray-200 hover:border-sage-300 hover:text-sage-600 hover:bg-gray-50"
+                    }
+                  `}
+                  style={selectedTag === tag ? { background: "linear-gradient(135deg, var(--lilac-purple) 0%, var(--sage-green) 100%)" } : {}}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Recipe Grid */}
