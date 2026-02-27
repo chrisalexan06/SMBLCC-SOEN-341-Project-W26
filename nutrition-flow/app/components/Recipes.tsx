@@ -9,7 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/componen
 import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
-import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks } from "lucide-react"; // Cute icons from lucide
+import { Checkbox } from "@/app/components/ui/checkbox";
+import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2 } from "lucide-react"; // Cute icons from lucide
+import { toast } from "sonner";
 
 export function Recipes({ recipes }: { recipes: any[] }) {
   const router = useRouter();
@@ -17,12 +19,16 @@ export function Recipes({ recipes }: { recipes: any[] }) {
   //SEARCH STATE
   const [searchQuery, setSearchQuery] = useState("");
 
+  //SELECTION STATE
+  const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
+
   //MODAL STATES
   const [editingRecipe, setEditingRecipe] = useState<any>(null);
   const [viewingRecipe, setViewingRecipe] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   //FORM STATE (For Editing)
   const [formData, setFormData] = useState<any>({
@@ -57,6 +63,54 @@ export function Recipes({ recipes }: { recipes: any[] }) {
       ingredients: recipe.ingredients || [],
     });
     setIsEditDialogOpen(true);
+  };
+
+  const handleToggleSelection = (recipeId: string) => {
+    setSelectedRecipes((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(recipeId)) {
+        newSet.delete(recipeId);
+      } else {
+        newSet.add(recipeId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedRecipes.size === 0) return;
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${selectedRecipes.size} recipe${selectedRecipes.size > 1 ? "s" : ""}? This action cannot be undone.`
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setIsDeleting(true);
+      const deletionPromises = Array.from(selectedRecipes).map((recipeId) =>
+        fetch("/api/recipes", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ recipeId }),
+        })
+      );
+
+      const responses = await Promise.all(deletionPromises);
+      const allSuccess = responses.every((res) => res.ok);
+
+      if (!allSuccess) {
+        throw new Error("Failed to delete one or more recipes");
+      }
+
+      setSelectedRecipes(new Set());
+      toast.success(`Successfully deleted ${selectedRecipes.size} recipe${selectedRecipes.size > 1 ? "s" : ""}`);
+      router.refresh();
+    } catch (error) {
+      toast.error("Error deleting recipes. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleViewDetails = (recipe: any) => {
@@ -106,16 +160,35 @@ export function Recipes({ recipes }: { recipes: any[] }) {
       {/*MAIN CONTENT*/}
       <main className="max-w-7xl mx-auto p-6">
         
-        {/* Search Bar */}
-        <div className="relative mb-8 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            placeholder="Search your recipes by name..."
-            className="w-full pl-10 pr-3 py-2 border rounded-xl bg-white focus:ring-2 focus:ring-sage-500 outline-none text-sm"
-            style={{ borderColor: "var(--sage-green-light)" }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        {/* Search Bar and Delete Button */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              placeholder="Search your recipes by name..."
+              className="w-full pl-10 pr-3 py-2 border rounded-xl bg-white focus:ring-2 focus:ring-sage-500 outline-none text-sm"
+              style={{ borderColor: "var(--sage-green-light)" }}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          {selectedRecipes.size > 0 && (
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-600">
+                {selectedRecipes.size} selected
+              </span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteSelected}
+                disabled={isDeleting}
+                className="gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                {isDeleting ? "Deleting..." : "Delete"}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Recipe Grid */}
@@ -128,9 +201,18 @@ export function Recipes({ recipes }: { recipes: any[] }) {
             {filteredRecipes.map((recipe) => (
               <Card key={recipe.id} className="overflow-hidden rounded-2xl bg-white flex flex-col relative group border-none shadow-sm hover:shadow-md transition-all">
                 
+                {/* Checkbox - Top Left */}
+                <div className="absolute top-3 left-3 z-10">
+                  <Checkbox
+                    checked={selectedRecipes.has(recipe.id)}
+                    onCheckedChange={() => handleToggleSelection(recipe.id)}
+                    className="w-5 h-5"
+                  />
+                </div>
+
                 {/* Edit Pencil (Hover Only) */}
                 <div className="absolute top-3 right-3 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button size="icon" className="rounded-full bg-sage-500 text-white" onClick={() => handleEditClick(recipe)}>
+                  <Button size="icon" className="rounded-full text-white" onClick={() => handleEditClick(recipe)} style={{ background: "linear-gradient(135deg, var(--lilac-purple) 0%, var(--sage-green) 100%)" }}>
                     <Pencil className="w-4 h-4" />
                   </Button>
                 </div>
@@ -161,9 +243,9 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                   {/* Single Full-Width Button */}
                   <div className="mt-auto">
                     <Button 
-                      variant="outline" 
-                      className="w-full text-xs font-bold border-gray-200 text-gray-700 hover:bg-gray-50 h-10" 
+                      className="w-full text-xs font-bold text-white h-10" 
                       onClick={() => handleViewDetails(recipe)}
+                      style={{ background: "linear-gradient(135deg, var(--lilac-purple) 0%, var(--sage-green) 100%)" }}
                     >
                       View Details
                     </Button>
