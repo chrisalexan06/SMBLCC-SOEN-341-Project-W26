@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/app/components/ui/carousel";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { Heart, MessageCircle, MapPin, User, Settings, Calendar, Plus } from "lucide-react";
+import { Heart, MessageCircle, MapPin, User, Settings, Calendar, Plus, Flame, Clock, BookOpen, Utensils, ChefHat, Target, Sun, Moon, Sunset, TrendingUp, Sparkles, Droplets } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import Image from "next/image";
-import { ChefHat } from "lucide-react";
-import { AddRecipePlaceholder } from "@/app/components/AddRecipePlaceholder";
+import { AddRecipePlaceholder } from "@/app/components/AddRecipe";
 
 const calorieData = [
   { name: "Consumed", value: 1650 },
@@ -22,42 +28,6 @@ const COLORS = {
   remaining: "#E0D5EF", // lilac purple light
 };
 
-const feedData = [
-  {
-    id: 1,
-    user: "Sarah Chen",
-    avatar: "🧑‍🎓",
-    image: "https://images.unsplash.com/photo-1672959202028-51e3b71255bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwYm93bCUyMGZvb2R8ZW58MXx8fHwxNzcwMDUwNTYzfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    caption: "Healthy lunch bowl! 🥗",
-    calories: 450,
-    likes: 23,
-    comments: 5,
-    time: "2h ago",
-  },
-  {
-    id: 2,
-    user: "Mike Johnson",
-    avatar: "👨‍🎓",
-    image: "https://images.unsplash.com/photo-1676300184847-4ee4030409c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXN0YSUyMGRpc2glMjBmb29kfGVufDF8fHx8MTc3MDAxMDA1NXww&ixlib=rb-4.1.0&q=80&w=1080",
-    caption: "Homemade pasta for dinner 🍝",
-    calories: 680,
-    likes: 34,
-    comments: 8,
-    time: "4h ago",
-  },
-  {
-    id: 3,
-    user: "Emma Davis",
-    avatar: "👩‍🎓",
-    image: "https://images.unsplash.com/photo-1609158087148-3bae840bcfda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmVha2Zhc3QlMjBhdm9jYWRvJTIwdG9hc3R8ZW58MXx8fHwxNzcwMDIzMTUyfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    caption: "Perfect breakfast to start the day ☀️",
-    calories: 520,
-    likes: 45,
-    comments: 12,
-    time: "6h ago",
-  },
-];
-
 const weekDays = [
   { day: "Mon", date: "Feb 3", meals: ["Oatmeal", "Salad Bowl", "Grilled Chicken"] },
   { day: "Tue", date: "Feb 4", meals: ["Smoothie", "Wrap", "Pasta"] },
@@ -68,37 +38,6 @@ const weekDays = [
   { day: "Sun", date: "Feb 9", meals: ["", "", ""] },
 ];
 
-const savedRecipes = [
-  {
-    id: 1,
-    name: "Quinoa Buddha Bowl",
-    image: "https://images.unsplash.com/photo-1672959202028-51e3b71255bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxoZWFsdGh5JTIwYm93bCUyMGZvb2R8ZW58MXx8fHwxNzcwMDUwNTYzfDA&ixlib=rb-4.1.0&q=80&w=400",
-    calories: 450,
-    time: "25 min",
-  },
-  {
-    id: 2,
-    name: "Avocado Toast",
-    image: "https://images.unsplash.com/photo-1609158087148-3bae840bcfda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxicmVha2Zhc3QlMjBhdm9jYWRvJTIwdG9hc3R8ZW58MXx8fHwxNzcwMDIzMTUyfDA&ixlib=rb-4.1.0&q=80&w=400",
-    calories: 350,
-    time: "10 min",
-  },
-  {
-    id: 3,
-    name: "Creamy Pasta",
-    image: "https://images.unsplash.com/photo-1676300184847-4ee4030409c0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXN0YSUyMGRpc2glMjBmb29kfGVufDF8fHx8MTc3MDAxMDA1NXww&ixlib=rb-4.1.0&q=80&w=400",
-    calories: 680,
-    time: "30 min",
-  },
-  {
-    id: 4,
-    name: "Meal Prep Bowl",
-    image: "https://images.unsplash.com/photo-1666251214795-a1296307d29c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdHVkZW50JTIwbWVhbCUyMHByZXB8ZW58MXx8fHwxNzY5OTk4ODk0fDA&ixlib=rb-4.1.0&q=80&w=400",
-    calories: 520,
-    time: "40 min",
-  },
-];
-
 export function Dashboard() {
   const router = useRouter();
   const [isAddRecipeOpen, setIsAddRecipeOpen] = useState(false);
@@ -106,6 +45,43 @@ export function Dashboard() {
   const consumedCalories = 1650;
   const percentage = Math.round((consumedCalories / totalCalories) * 100);
   const todayIndex = 2; // Wednesday is today
+
+  // Dynamic greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return { text: "Good Morning", icon: Sun };
+    if (hour < 17) return { text: "Good Afternoon", icon: Sunset };
+    return { text: "Good Evening", icon: Moon };
+  };
+  const greeting = getGreeting();
+  const GreetingIcon = greeting.icon;
+
+  // Weekly progress data (mock)
+  const weekProgress = [85, 72, 83, 0, 0, 0, 0]; // Mon-Sun calorie % hit
+  const todayDayIndex = new Date().getDay(); // 0=Sun, adjust to Mon-start
+  const daysLogged = weekProgress.filter(v => v > 0).length;
+
+  // NEW: State for the Fake FYP
+  const [fypRecipes, setFypRecipes] = useState<any[]>([]);
+
+  // NEW: Fetch and shuffle recipes for the FYP
+  useEffect(() => {
+    const fetchAndShuffleFYP = async () => {
+      try {
+        const res = await fetch("/api/recipes?all=true");
+        if (!res.ok) return;
+        const data = await res.json();
+        
+        // Shuffle the array and pick the top 3 for the FYP illusion
+        const shuffled = data.sort(() => 0.5 - Math.random());
+        setFypRecipes(shuffled.slice(0, 20));
+      } catch (error) {
+        console.error("Failed to load FYP:", error);
+      }
+    };
+
+    fetchAndShuffleFYP();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -140,155 +116,177 @@ export function Dashboard() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-6">
-        {/* Weekly Meal Planner - Full Width */}
-        <Card className="p-6 rounded-2xl mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <Calendar className="w-6 h-6" style={{ color: "var(--sage-green-dark)" }} />
-              <h2>Weekly Meal Plan</h2>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"                onClick={() => setIsAddRecipeOpen(true)}
-                style={{ borderColor: "var(--sage-green)", color: "var(--sage-green-dark)" }}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Recipe
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"                style={{ borderColor: "var(--sage-green)", color: "var(--sage-green-dark)" }}
-              >
-                Plan Week
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => router.push("/recipes")}
-                style={{ borderColor: "var(--sage-green)", color: "var(--sage-green-dark)" }}
-              >
-                My Recipes
-              </Button>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-            {weekDays.map((day, index) => (
-              <div
-                key={day.day}
-                className={`p-4 rounded-xl border-2 ${
-                  index === todayIndex ? "border-[var(--sage-green)]" : "border-gray-200"
-                }`}
-                style={
-                  index === todayIndex
-                    ? { backgroundColor: "var(--sage-green-light)", borderColor: "var(--sage-green)" }
-                    : {}
-                }
-              >
-                <div className="text-center mb-3">
-                  <div className={`text-sm ${index === todayIndex ? "font-semibold" : "text-muted-foreground"}`}>
-                    {day.day}
-                  </div>
-                  <div className="text-xs text-muted-foreground">{day.date}</div>
+      <main className="max-w-7xl mx-auto px-6 py-4">
+        {/* Hero Section - Today's Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          {/* Daily Summary Card */}
+          <Card className="col-span-1 md:col-span-2 p-4 rounded-2xl">
+            {/* Greeting Row */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <GreetingIcon className="w-5 h-5 text-amber-500" />
+                  <h3 className="text-xl font-semibold text-gray-800">{greeting.text}!</h3>
                 </div>
-                <div className="space-y-2">
-                  {["B", "L", "D"].map((mealType, mealIndex) => (
-                    <div key={mealType}>
-                      {day.meals[mealIndex] ? (
-                        <div className="text-xs p-2 bg-white rounded-lg border">
-                          <div className="text-[10px] text-muted-foreground mb-1">{mealType}</div>
-                          <div className="truncate">{day.meals[mealIndex]}</div>
-                        </div>
-                      ) : (
-                        <button className="w-full text-xs p-2 bg-white rounded-lg border border-dashed border-gray-300 hover:border-gray-400 flex items-center justify-center gap-1">
-                          <Plus className="w-3 h-3" />
-                          <span className="text-[10px]">{mealType}</span>
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                <p className="text-xs text-muted-foreground">You're on a <span className="font-medium text-gray-700">3-day streak</span>. Keep it going!</p>
               </div>
-            ))}
-          </div>
-        </Card>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column - Calories Chart */}
-          <div className="lg:col-span-3">
-            <Card className="p-6 rounded-2xl">
-              <h3 className="mb-4">Today's Calories</h3>
-              <div className="relative">
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={calorieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      <Cell fill={COLORS.consumed} />
-                      <Cell fill={COLORS.remaining} />
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <div className="text-3xl">{percentage}%</div>
-                  <div className="text-sm text-muted-foreground">of goal</div>
+            {/* Mini Week Progress */}
+            <div className="flex items-end gap-1.5 mb-4">
+              {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => (
+                <div key={i} className="flex flex-col items-center gap-1 flex-1">
+                  <div 
+                    className="w-full rounded-md transition-all"
+                    style={{ 
+                      height: weekProgress[i] > 0 ? `${Math.max(weekProgress[i] * 0.32, 8)}px` : "6px",
+                      backgroundColor: weekProgress[i] > 0 ? (i === todayIndex ? "var(--sage-green)" : "var(--sage-green-light)") : "#f3f4f6",
+                    }}
+                  />
+                  <span className={`text-[10px] ${i === todayIndex ? "font-semibold text-gray-700" : "text-gray-400"}`}>{day}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats Row */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="flex items-center gap-2 p-2 rounded-xl" style={{ backgroundColor: "var(--sage-green-light)" }}>
+                <Flame className="w-4 h-4" style={{ color: "var(--sage-green-dark)" }} />
+                <div>
+                  <p className="text-[10px] text-muted-foreground leading-none">Calories</p>
+                  <p className="text-sm font-semibold text-gray-800">{consumedCalories}<span className="text-xs font-normal text-muted-foreground">/{totalCalories}</span></p>
                 </div>
               </div>
-              <div className="mt-6 space-y-3">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: COLORS.consumed }}
-                    />
-                    <span className="text-sm">Consumed</span>
-                  </div>
-                  <span className="text-sm">{consumedCalories} cal</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{ backgroundColor: COLORS.remaining }}
-                    />
-                    <span className="text-sm">Remaining</span>
-                  </div>
-                  <span className="text-sm">{totalCalories - consumedCalories} cal</span>
-                </div>
-                <div className="pt-3 border-t">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Goal</span>
-                    <span className="text-sm">{totalCalories} cal</span>
-                  </div>
+              <div className="flex items-center gap-2 p-2 rounded-xl" style={{ backgroundColor: "var(--lilac-purple-light)" }}>
+                <Droplets className="w-4 h-4" style={{ color: "var(--lilac-purple-dark)" }} />
+                <div>
+                  <p className="text-[10px] text-muted-foreground leading-none">Water</p>
+                  <p className="text-sm font-semibold text-gray-800">4<span className="text-xs font-normal text-muted-foreground">/8 cups</span></p>
                 </div>
               </div>
+              <div className="flex items-center gap-2 p-2 rounded-xl bg-amber-50">
+                <Calendar className="w-4 h-4 text-amber-600" />
+                <div>
+                  <p className="text-[10px] text-muted-foreground leading-none">Streak</p>
+                  <p className="text-sm font-semibold text-gray-800">3 <span className="text-xs font-normal text-muted-foreground">days</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* Next Meal Nudge */}
+            <div className="mt-3 flex items-center gap-2 p-2.5 rounded-xl border border-dashed border-gray-200 bg-gray-50/50">
+              <div className="p-1.5 rounded-lg bg-orange-50">
+                <Sparkles className="w-4 h-4 text-orange-400" />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-gray-700">Time for your next meal!</p>
+                <p className="text-[10px] text-muted-foreground">You've had 2 of 4 meals today</p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Today's Calories */}
+          <Card className="col-span-1 md:col-span-1 p-4 rounded-2xl flex flex-col items-center justify-center">
+            <h4 className="text-base font-semibold text-gray-700 mt-6 mb-2">Today's Calories</h4>
+            <div className="relative">
+              <ResponsiveContainer width={150} height={150}>
+                <PieChart>
+                  <Pie
+                    data={calorieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={45}
+                    outerRadius={65}
+                    paddingAngle={5}
+                    dataKey="value"
+                    strokeWidth={0}
+                  >
+                    <Cell fill={COLORS.consumed} />
+                    <Cell fill={COLORS.remaining} />
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex items-center justify-center flex-col">
+                <div className="text-2xl font-bold text-gray-800">{percentage}%</div>
+                <div className="text-[10px] text-muted-foreground">of goal</div>
+              </div>
+            </div>
+            <div className="mt-2 w-full max-w-[200px] space-y-1.5">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.consumed }} />
+                  <span className="text-xs">Consumed</span>
+                </div>
+                <span className="text-xs font-medium">{consumedCalories} cal</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.remaining }} />
+                  <span className="text-xs">Remaining</span>
+                </div>
+                <span className="text-xs font-medium">{totalCalories - consumedCalories} cal</span>
+              </div>
+              <div className="pt-2 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs">Goal</span>
+                  <span className="text-xs font-medium">{totalCalories} cal</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Recipes Quick Actions */}
+          <Card className="col-span-1 md:col-span-1 p-4 rounded-2xl flex flex-col justify-center text-center">
+            <div className="mb-4">
+              <div className="flex justify-center items-center mb-1">
+                <Utensils className="w-5 h-5 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-0.5">Recipes</h3>
+              <p className="text-xs text-muted-foreground">Manage your personal cookbook</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2 justify-center">
               <Button
-                className="w-full mt-6 text-white"
+                onClick={() => setIsAddRecipeOpen(true)}
+                className="w-full text-white shadow-none h-auto py-2 flex flex-col gap-0.5 items-center justify-center"
                 style={{ backgroundColor: "var(--sage-green)" }}
               >
-                Log Meal
+                <Plus className="w-4 h-4" />
+                <span className="text-[11px] font-normal">Add New</span>
               </Button>
-            </Card>
+              <Button
+                onClick={() => router.push("/recipes")}
+                className="w-full text-white shadow-none border-0 h-auto py-2 flex flex-col gap-0.5 items-center justify-center"
+                style={{ backgroundColor: "var(--lilac-purple)" }}
+              >
+                <BookOpen className="w-4 h-4" />
+                <span className="text-[11px] font-normal">My Recipes</span>
+              </Button>
+            </div>
+          </Card>
+        </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-stretch">
+          {/* Left Column - My Targets */}
+          <div className="lg:col-span-3 flex">
             {/* My Targets - Macros */}
-            <Card className="p-6 rounded-2xl mt-6">
-              <h3 className="mb-4">My Targets</h3>
-              <div className="space-y-4">
+            <Card className="p-4 rounded-2xl flex-1 flex flex-col justify-center">
+              <div className="mb-6 text-center">
+                <div className="flex justify-center items-center mb-2">
+                  <Target className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-semibold mb-1">My Targets</h3>
+                <p className="text-sm text-muted-foreground">Track your daily macros</p>
+              </div>
+              <div className="space-y-3 px-1">
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm">Calories</span>
-                    <span className="text-sm">1650/2000</span>
+                    <span className="text-xs font-medium text-gray-700">Calories</span>
+                    <span className="text-xs font-semibold text-gray-800">1650/2000</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-100 rounded-full h-2">
                     <div
-                      className="h-2 rounded-full"
+                      className="h-2 rounded-full transition-all"
                       style={{
                         width: "83%",
                         backgroundColor: "var(--sage-green)",
@@ -298,12 +296,12 @@ export function Dashboard() {
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm">Fats</span>
-                    <span className="text-sm">45/65g</span>
+                    <span className="text-xs font-medium text-gray-700">Fats</span>
+                    <span className="text-xs font-semibold text-gray-800">45/65g</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-100 rounded-full h-2">
                     <div
-                      className="h-2 rounded-full"
+                      className="h-2 rounded-full transition-all"
                       style={{
                         width: "69%",
                         backgroundColor: "var(--lilac-purple)", 
@@ -313,12 +311,12 @@ export function Dashboard() {
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm">Carbs</span>
-                    <span className="text-sm">180/250g</span>
+                    <span className="text-xs font-medium text-gray-700">Carbs</span>
+                    <span className="text-xs font-semibold text-gray-800">180/250g</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-100 rounded-full h-2">
                     <div
-                      className="h-2 rounded-full"
+                      className="h-2 rounded-full transition-all"
                       style={{
                         width: "72%",
                         backgroundColor: "var(--sage-green)",
@@ -328,12 +326,12 @@ export function Dashboard() {
                 </div>
                 <div>
                   <div className="flex justify-between mb-1">
-                    <span className="text-sm">Proteins</span>
-                    <span className="text-sm">95/150g</span>
+                    <span className="text-xs font-medium text-gray-700">Proteins</span>
+                    <span className="text-xs font-semibold text-gray-800">95/150g</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-100 rounded-full h-2">
                     <div
-                      className="h-2 rounded-full"
+                      className="h-2 rounded-full transition-all"
                       style={{
                         width: "63%",
                         backgroundColor: "var(--lilac-purple)",
@@ -342,84 +340,109 @@ export function Dashboard() {
                   </div>
                 </div>
               </div>
+              <Button
+                className="w-full mt-4 text-white text-xs h-8 rounded-lg"
+                style={{ backgroundColor: "var(--sage-green)" }}
+              >
+                Log Meal
+              </Button>
             </Card>
           </div>
 
-          {/* Middle Column - Social Feed */}
-          <div className="lg:col-span-6 space-y-6">
-            <div>
-              <h2 className="mb-4">Friend Feed</h2>
-              <div className="space-y-4">
-                {feedData.map((post) => (
-                  <Card key={post.id} className="overflow-hidden rounded-2xl">
-                    {/* Post Header */}
-                    <div className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center"
-                          style={{ backgroundColor: "var(--lilac-purple-light)" }}
-                        >
-                          <span>{post.avatar}</span>
-                        </div>
-                        <div>
-                          <div>{post.user}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {post.time}
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        className="px-3 py-1 rounded-full text-sm"
-                        style={{ backgroundColor: "var(--sage-green-light)" }}
-                      >
-                        {post.calories} cal
-                      </div>
-                    </div>
+          {/* Middle Column - MODERN CAROUSEL FEED */}
+          <div className="lg:col-span-6 flex flex-col">
 
-                    {/* Post Image */}
-                    <ImageWithFallback
-                      src={post.image}
-                      alt={post.caption}
-                      className="w-full h-80 object-cover"
-                    />
+             <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                className="w-full relative group/carousel flex-1"
+              >
+                <CarouselContent className="">
+                  {fypRecipes.length > 0 ? (
+                    fypRecipes.map((recipe) => (
+                      <CarouselItem key={recipe.id} className="basis-full">
+                        <Card 
+                            key={recipe.id} 
+                            className="overflow-hidden rounded-3xl border border-gray-100 shadow-sm bg-white group cursor-pointer flex flex-col h-full"
+                          >
+                            {/* Image Area */}
+                            <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden flex items-center justify-center">
+                              <img 
+                                src={recipe.imageUrl || "/images/meals.webp"} 
+                                alt={recipe.name}
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              />
+                            </div>
+                            
+                            {/* Content Below Image */}
+                            <div className="px-3 py-2 flex flex-col gap-1">
+                                <p className="text-sm text-gray-800 leading-snug">
+                                  {recipe.name}
+                                </p>
+                                
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  <span className="flex items-center gap-1">
+                                    <Flame className="w-3.5 h-3.5 text-orange-400" />
+                                    {recipe.estimatedCalories || "---"} kcal
+                                  </span>
+                                  <span className="text-gray-300">·</span>
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="w-3.5 h-3.5" style={{ color: "var(--sage-green)" }} />
+                                    {recipe.prepTimeMinutes} min
+                                  </span>
+                                </div>
 
-                    {/* Post Actions */}
-                    <div className="p-4">
-                      <p className="mb-3">{post.caption}</p>
-                      <div className="flex items-center gap-4">
-                        <button className="flex items-center gap-2 hover:opacity-70">
-                          <Heart className="w-5 h-5" />
-                          <span className="text-sm">{post.likes}</span>
-                        </button>
-                        <button className="flex items-center gap-2 hover:opacity-70">
-                          <MessageCircle className="w-5 h-5" />
-                          <span className="text-sm">{post.comments}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
+                                <div className="flex flex-wrap gap-1">
+                                    {recipe.dietaryTags?.slice(0, 3).map((tag: string) => (
+                                      <span key={tag} className="text-[11px] text-gray-400">
+                                        #{tag.replace('_', '')}
+                                      </span>
+                                    ))}
+                                </div>
+                            </div>
+                          </Card>
+                      </CarouselItem>
+                    ))
+                  ) : (
+                    /* Skeleton Loaders */
+                    [1, 2, 3].map((i) => (
+                      <CarouselItem key={i} className="basis-full">
+                        <div className="w-full h-64 rounded-3xl bg-gray-100 animate-pulse border border-gray-200"></div>
+                      </CarouselItem>
+                    ))
+                  )}
+                </CarouselContent>
+                
+                {/* Navigation Buttons - Tucked Inside or Better Positioned */}
+                <div className="hidden lg:block pointer-events-none absolute inset-0">
+                   <CarouselPrevious className="left-2 bg-white/80 hover:bg-white text-gray-800 border-none shadow-md pointer-events-auto z-10" />
+                   <CarouselNext className="right-2 bg-white/80 hover:bg-white text-gray-800 border-none shadow-md pointer-events-auto z-10" />
+                </div>
+              </Carousel>
           </div>
 
           {/* Right Column - Map */}
-          <div className="lg:col-span-3">
-            <Card className="p-6 rounded-2xl">
-              <h3 className="mb-4">Nearby Places</h3>
+          <div className="lg:col-span-3 flex">
+            <Card className="p-3 rounded-2xl flex-1 flex flex-col">
+              <div className="mb-3 text-center">
+                <h3 className="text-lg font-semibold mb-0.5">Nearby Places</h3>
+                <p className="text-xs text-muted-foreground">Restaurants around you</p>
+              </div>
               <div
-                className="w-full h-64 rounded-xl flex items-center justify-center"
+                className="w-full flex-1 rounded-xl flex items-center justify-center min-h-0"
                 style={{ backgroundColor: "var(--sage-green-light)" }}
               >
                 <div className="text-center">
-                  <MapPin className="w-12 h-12 mx-auto mb-2" style={{ color: "var(--sage-green-dark)" }} />
-                  <p className="text-sm text-muted-foreground">Map view</p>
+                  <MapPin className="w-8 h-8 mx-auto mb-1" style={{ color: "var(--sage-green-dark)" }} />
+                  <p className="text-xs text-muted-foreground">Map view</p>
                 </div>
               </div>
-              <div className="mt-4 space-y-3">
-                <div className="p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <div className="flex justify-between items-start mb-1">
-                    <div>Campus Cafe</div>
+              <div className="mt-2 space-y-0.5">
+                <div className="p-1.5 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex justify-between items-start mb-0.5">
+                    <div className="text-xs">Campus Cafe</div>
                     <div
                       className="px-2 py-0.5 rounded text-xs"
                       style={{ backgroundColor: "var(--sage-green-light)" }}
@@ -427,11 +450,11 @@ export function Dashboard() {
                       0.3 mi
                     </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">Healthy bowls, salads</div>
+                  <div className="text-[11px] text-muted-foreground">Healthy bowls, salads</div>
                 </div>
-                <div className="p-3 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <div className="flex justify-between items-start mb-1">
-                    <div>Pizza Palace</div>
+                <div className="p-1.5 rounded-lg hover:bg-gray-50 cursor-pointer">
+                  <div className="flex justify-between items-start mb-0.5">
+                    <div className="text-xs">Pizza Palace</div>
                     <div
                       className="px-2 py-0.5 rounded text-xs"
                       style={{ backgroundColor: "var(--sage-green-light)" }}
@@ -439,20 +462,18 @@ export function Dashboard() {
                       0.5 mi
                     </div>
                   </div>
-                  <div className="text-sm text-muted-foreground">Italian, Pizza</div>
+                  <div className="text-[11px] text-muted-foreground">Italian, Pizza</div>
                 </div>
               </div>
             </Card>
-
-            {/* Nearby Places - Right Column */}
           </div>
         </div>
       </main>
 
       <Dialog open={isAddRecipeOpen} onOpenChange={setIsAddRecipeOpen}>
-        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto rounded-3xl border-0 shadow-2xl p-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader>
-            <DialogTitle>Add Your Recipe</DialogTitle>
+            <DialogTitle className="text-xl font-bold text-gray-800">Add Your Recipe</DialogTitle>
           </DialogHeader>
           <AddRecipePlaceholder />
         </DialogContent>

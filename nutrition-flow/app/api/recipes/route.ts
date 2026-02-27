@@ -2,6 +2,31 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { auth } from "@clerk/nextjs/server"; // Use Clerk
 
+export async function GET(req: Request) {
+  try {
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check if the URL has ?all=true
+    const { searchParams } = new URL(req.url);
+    const fetchAll = searchParams.get("all") === "true";
+
+    // If fetchAll is true, grab the whole DB. If false, just grab the user's recipes.
+    const recipes = await prisma.recipe.findMany({
+      where: fetchAll ? undefined : { userId },
+      include: { ingredients: true },
+      orderBy: { createdAt: "desc" }, // Newest first
+    });
+
+    return NextResponse.json(recipes);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const { userId } = await auth(); // Get the ID from Clerk
