@@ -14,7 +14,8 @@ test.describe('Authentication', () => {
     await signOut(page)
     await expect(page).toHaveURL('/')
   })
-
+  
+//might delete this test since the middleware should handle redirecting unauthenticated users, but it doesn't hurt to have an extra check
   test('unauthenticated user is redirected', async ({ page }) => {
     await page.goto('/dashboard')
     await expect(page).toHaveURL(/\/login/)
