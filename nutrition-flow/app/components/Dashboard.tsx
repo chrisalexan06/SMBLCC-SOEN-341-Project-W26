@@ -185,55 +185,41 @@ export function Dashboard() {
             </div>
           </Card>
 
-          {/* Today's Calories */}
-          <Card className="col-span-1 md:col-span-1 p-4 rounded-2xl flex flex-col items-center justify-center">
-            <h4 className="text-base font-semibold text-gray-700 mt-6 mb-2">Today's Calories</h4>
-            <div className="relative">
-              <ResponsiveContainer width={150} height={150}>
-                <PieChart>
-                  <Pie
-                    data={calorieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={65}
-                    paddingAngle={5}
-                    dataKey="value"
-                    strokeWidth={0}
-                  >
-                    <Cell fill={COLORS.consumed} />
-                    <Cell fill={COLORS.remaining} />
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="absolute inset-0 flex items-center justify-center flex-col">
-                <div className="text-2xl font-bold text-gray-800">{percentage}%</div>
-                <div className="text-[10px] text-muted-foreground">of goal</div>
-              </div>
-            </div>
-            <div className="mt-2 w-full max-w-[200px] space-y-1.5">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.consumed }} />
-                  <span className="text-xs">Consumed</span>
-                </div>
-                <span className="text-xs font-medium">{consumedCalories} cal</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS.remaining }} />
-                  <span className="text-xs">Remaining</span>
-                </div>
-                <span className="text-xs font-medium">{totalCalories - consumedCalories} cal</span>
-              </div>
-              <div className="pt-2 border-t">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs">Goal</span>
-                  <span className="text-xs font-medium">{totalCalories} cal</span>
-                </div>
-              </div>
-            </div>
-          </Card>
+                    <Card
+  className="col-span-1 md:col-span-1 p-4 rounded-2xl flex flex-col justify-center text-center"
+  onClick={() => router.push("/planning")}
+>
+  <div className="flex flex-col items-center text-center w-full space-y-4">
+    <div className="relative">
+      <div
+        className="w-16 h-16 rounded-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110"
+        style={{ backgroundColor: "var(--sage-green-light)" }}
+      >
+        {/* Calendar icon */}
+        <Calendar className="w-8 h-8" style={{ color: "var(--sage-green-dark)" }} />
+      </div>
+    </div>
+
+    <div>
+      <h4 className="text-lg font-bold mb-0.5 text-gray-800 tracking-tight">
+        Weekly Roadmap
+      </h4>
+      <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">
+        Plan your success
+      </p>
+    </div>
+
+    {/* Button moved up  center */}
+    <div className="w-full max-w-[140px] pt-2">
+      <Button
+        className="w-full text-white shadow-none h-auto py-2.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:brightness-110"
+        style={{ backgroundColor: "var(--sage-green)" }}
+      >
+        <span className="text-[11px] font-bold uppercase tracking-wider">Open Planner</span>
+      </Button>
+    </div>
+  </div>
+</Card>
 
           {/* Recipes Quick Actions */}
           <Card className="col-span-1 md:col-span-1 p-4 rounded-2xl flex flex-col justify-center text-center">

@@ -100,8 +100,9 @@ export function WeeklyPlanner() {
               {/* MEAL PLAN SECTION - Sage Green Theme */}
               <Card 
                 className={`p-6 flex flex-col h-[450px] rounded-[2.8rem] border-2 transition-all duration-500 
-                  ${day.isToday ? 'bg-white shadow-xl scale-[1.02]' : 'bg-white/90 border-transparent'}`}
-                style={{ borderColor: day.isToday ? "var(--sage-green)" : "transparent" }}
+                    hover:-translate-y-2 hover:shadow-2xl hover:bg-white ${day.isToday ? 'bg-white shadow-xl scale-[1.02] border-[var(--sage-green)]' : 'bg-white/90 border-transparent'}`} 
+                    style={{ borderColor: day.isToday ? "var(--sage-green)" : undefined, cursor: 'pointer' }}  
+
               >
                 <div className="mb-8">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] mb-1" 
@@ -129,7 +130,7 @@ export function WeeklyPlanner() {
               </Card>
 
               {/* HYDRATION PLAN SECTION - Lilac Purple Theme */}
-              <Card className="p-5 rounded-[2.2rem] border-none shadow-lg bg-white relative group overflow-hidden">
+              <Card className="p-5 rounded-[2.2rem] border-none shadow-lg bg-white relative group overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer" >  
                 {/* Visual Section Indicator */}
                 <div className="absolute top-0 left-0 w-full h-1.5 transition-colors" 
                      style={{ backgroundColor: "var(--lilac-purple-light)" }} />
