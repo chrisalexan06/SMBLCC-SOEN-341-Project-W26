@@ -3,6 +3,9 @@
 import { useState, useMemo } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
+import { useEffect } from "react";
+
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -25,6 +28,27 @@ export function WeeklyPlanner() {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [waterLevels, setWaterLevels] = useState<Record<string, number>>({});
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<{date: string, slot: number} | null>(null);
+  const [userRecipes, setUserRecipes] = useState<any[]>([]);
+
+  // Fetch the user's recipes from your API
+useEffect(() => {
+  const fetchRecipes = async () => {
+    const res = await fetch("/api/recipes");
+    if (res.ok) {
+      const data = await res.json();
+      setUserRecipes(data);
+    }
+  };
+  fetchRecipes();
+}, []);
+
+const handleAddRecipeClick = (date: string, slot: number) => {
+  setSelectedSlot({ date, slot });
+  setIsSelectorOpen(true);
+};
+
   const waterGoal = 8;
   const today = new Date();
 
@@ -112,21 +136,23 @@ export function WeeklyPlanner() {
                   <p className="text-2xl font-black text-gray-800">{day.dateDisplay}</p>
                 </div>
                 
-                <div className="flex-1 space-y-4">
-                  {[1, 2, 3].map((slot) => (
-                    <button 
-                      key={slot}
-                      className="w-full py-8 border-2 border-dashed rounded-[1.8rem] flex items-center justify-center transition-all 
-                        hover:bg-[var(--sage-green-light)]/20 hover:border-[var(--sage-green)] group"
-                      style={{ 
-                        borderColor: "rgba(168, 181, 160, 0.2)", 
-                        backgroundColor: "rgba(168, 181, 160, 0.05)" 
-                      }}
-                    >
-                      <Plus className="w-6 h-6 transition-colors text-gray-300 group-hover:text-[var(--sage-green)]" />
-                    </button>
-                  ))}
-                </div>
+                {/* Meal Slots: Clicking this now triggers the recipe selection */}
+              <div className="flex-1 space-y-4">
+                {[1, 2, 3].map((slot) => (
+                  <button
+                    key={slot}
+                    onClick={() => handleAddRecipeClick(day.dateKey, slot)}
+                    className="w-full py-8 border-2 border-dashed rounded-[1.8rem] flex items-center justify-center transition-all
+                      hover:bg-[var(--sage-green-light)]/30 hover:border-[var(--sage-green)] hover:scale-105 active:scale-95 group"
+                    style={{
+                      borderColor: "rgba(168, 181, 160, 0.25)",
+                      backgroundColor: "rgba(168, 181, 160, 0.05)"
+                    }}
+                  >
+                    <Plus className="w-7 h-7 transition-all duration-300 text-gray-200 group-hover:text-[var(--sage-green)] group-hover:rotate-90" />
+                  </button>
+                ))}
+              </div>
               </Card>
 
               {/* HYDRATION PLAN SECTION - Lilac Purple Theme */}
@@ -180,6 +206,41 @@ export function WeeklyPlanner() {
           ))}
         </div>
       </div>
+      
+<Dialog open={isSelectorOpen} onOpenChange={setIsSelectorOpen}>
+  <DialogContent className="sm:max-w-md rounded-[2.5rem] border-none p-8">
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold text-gray-800">Select Recipe</DialogTitle>
+      <p className="text-xs font-medium text-gray-400 uppercase tracking-widest">Add to your Roadmap</p>
+    </DialogHeader>
+   
+    <div className="grid gap-4 py-4 max-h-[400px] overflow-y-auto pr-2">
+      {userRecipes.length > 0 ? (
+        userRecipes.map((recipe) => (
+          <button
+            key={recipe.id}
+            className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-[var(--sage-green)] hover:bg-[var(--sage-green-light)]/10 transition-all group text-left"
+            onClick={() => {
+              // Logic to save the meal to the planner goes here
+              setIsSelectorOpen(false);
+            }}
+          >
+            <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden">
+              <img src={recipe.imageUrl || "/images/meals.webp"} className="w-full h-full object-cover" />
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-gray-800">{recipe.name}</p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-tight">{recipe.estimatedCalories} kcal</p>
+            </div>
+            <Plus className="w-5 h-5 text-gray-200 group-hover:text-[var(--sage-green)]" />
+          </button>
+        ))
+      ) : (
+        <p className="text-center py-8 text-gray-400 text-sm">No recipes found. Add one in the dashboard first!</p>
+      )}
+    </div>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }
