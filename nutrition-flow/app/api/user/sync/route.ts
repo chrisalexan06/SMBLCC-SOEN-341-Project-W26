@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/app/lib/prisma";
 
-//checks whether user exists in database
+//checks whether user exists in database, creates if not
 export async function POST() {
 	try {
 		//check user authentication
@@ -21,15 +21,26 @@ export async function POST() {
 			return NextResponse.json({ synced: true, user: existingUser });
 		}
 
-		//if user is authenticated but not found in DB, prompt client to create account
+		//if user is authenticated but not found in DB, create account
+		const newUser = await prisma.user.create({
+			data: {
+				id: user.id,
+				email: user.emailAddresses[0]?.emailAddress || "",
+				firstName: user.firstName || "",
+				lastName: user.lastName || "",
+				age: 0,
+				height: 0,
+				currentWeight: 0,
+			},
+		});
+
 		return NextResponse.json(
 			{
-				synced: false,
-				error: "Account not found",
-				message: "Account does not exist. Please create an account.",
-				action: "signup",
+				synced: true,
+				user: newUser,
+				message: "Account created successfully.",
 			},
-			{ status: 404 }
+			{ status: 201 }
 		);
 	} catch (error) {
 		console.error("User Sync Error:", error);

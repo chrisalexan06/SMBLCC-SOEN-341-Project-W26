@@ -210,9 +210,9 @@ export function Dashboard() {
     </div>
 
     {/* Button moved up  center */}
-    <div className="w-full max-w-[140px] pt-2">
+    <div className="w-full pb-11">
       <Button
-        className="w-full text-white shadow-none h-auto py-2.5 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:brightness-110"
+        className="w-full text-white shadow-none h-auto py-2.5 pb-2 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:brightness-110"
         style={{ backgroundColor: "var(--sage-green)" }}
       >
         <span className="text-[11px] font-bold uppercase tracking-wider">Open Planner</span>
@@ -223,31 +223,43 @@ export function Dashboard() {
 
           {/* Recipes Quick Actions */}
           <Card className="col-span-1 md:col-span-1 p-4 rounded-2xl flex flex-col justify-center text-center">
-            <div className="mb-4">
-              <div className="flex justify-center items-center mb-1">
-                <Utensils className="w-5 h-5 text-muted-foreground" />
+            <div className="flex flex-col items-center text-center w-full space-y-4">
+              <div className="relative">
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center transition-transform duration-500 group-hover:scale-110"
+                  style={{ backgroundColor: "var(--sage-green-light)" }}
+                >
+                  <Utensils className="w-8 h-8" style={{ color: "var(--sage-green-dark)" }} />
+                </div>
               </div>
-              <h3 className="text-lg font-semibold mb-0.5">Recipes</h3>
-              <p className="text-xs text-muted-foreground">Manage your personal cookbook</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 justify-center">
-              <Button
-                onClick={() => setIsAddRecipeOpen(true)}
-                className="w-full text-white shadow-none h-auto py-2 flex flex-col gap-0.5 items-center justify-center"
-                style={{ backgroundColor: "var(--sage-green)" }}
-              >
-                <Plus className="w-4 h-4" />
-                <span className="text-[11px] font-normal">Add New</span>
-              </Button>
-              <Button
-                onClick={() => router.push("/recipes")}
-                className="w-full text-white shadow-none border-0 h-auto py-2 flex flex-col gap-0.5 items-center justify-center"
-                style={{ backgroundColor: "var(--lilac-purple)" }}
-              >
-                <BookOpen className="w-4 h-4" />
-                <span className="text-[11px] font-normal">My Recipes</span>
-              </Button>
+
+              <div>
+                <h4 className="text-lg font-bold mb-0.5 text-gray-800 tracking-tight">
+                  Recipes
+                </h4>
+                <p className="text-[10px] font-medium uppercase tracking-widest text-gray-400">
+                  Manage your cookbook
+                </p>
+              </div>
+
+              <div className="w-full flex flex-col gap-2">
+                <Button
+                  onClick={() => setIsAddRecipeOpen(true)}
+                  className="w-full text-white shadow-none h-auto py-2.5 rounded-xl flex items-center justify-center transition-all duration-300 gap-2"
+                  style={{ backgroundColor: "var(--sage-green)" }}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">Add New</span>
+                </Button>
+                <Button
+                  onClick={() => router.push("/recipes")}
+                  className="w-full text-white shadow-none border-0 h-auto py-2.5 rounded-xl flex items-center justify-center transition-all duration-300 gap-2"
+                  style={{ backgroundColor: "var(--lilac-purple)" }}
+                >
+                  <BookOpen className="w-4 h-4" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">My Recipes</span>
+                </Button>
+              </div>
             </div>
           </Card>
         </div>

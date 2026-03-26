@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
 import { Geist, Geist_Mono } from "next/font/google";
+import { UserSync } from "@/app/components/UserSync";
 import "./globals.css";
 import "./styles/index.css";
 
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-y-scroll`}
       >
+        <UserSync />
         {/* clerk header from setup online
         <nav className="flex justify-between items-center w-full px-8 py-4 bg-brand-sage text-white shadow-md">
             {/* Show the sign-in and sign-up buttons when the user is signed out 
