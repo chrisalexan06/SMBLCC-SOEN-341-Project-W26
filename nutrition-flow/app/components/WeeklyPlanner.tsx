@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { 
   ChevronLeft, 
@@ -10,7 +11,18 @@ import {
   Plus, 
   ArrowLeft, 
   Droplets,
-  Minus 
+  Minus,
+  Pencil,
+  Trash2,
+  Clock,
+  Flame,
+  DollarSign,
+  Utensils,
+  ListOrdered,
+  ChefHat,
+  Tag,
+  ImageIcon,
+  X
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { 
@@ -23,20 +35,39 @@ import {
 } from "date-fns";
 
 export function WeeklyPlanner() {
-    // --- STATE ---
+    //CONSTANTS
+    const slotToMealType: Record<number, string> = { 1: 'BREAKFAST', 2: 'LUNCH', 3: 'DINNER' };
+
+    //STATE
     const [currentDate, setCurrentDate] = useState(new Date());
     const [waterLevels, setWaterLevels] = useState<Record<string, number>>({});
     const [plannedMeals, setPlannedMeals] = useState<Record<string, any>>({});
     const [isSelectorOpen, setIsSelectorOpen] = useState(false);
     const [selectedSlot, setSelectedSlot] = useState<{date: string, slot: number} | null>(null);
     const [userRecipes, setUserRecipes] = useState<any[]>([]);
+    const [hoveredMeal, setHoveredMeal] = useState<{date: string, slot: number} | null>(null);
+    const [editingRecipe, setEditingRecipe] = useState<any>(null);
+    const [isEditRecipeOpen, setIsEditRecipeOpen] = useState(false);
+    const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+    const [editFormData, setEditFormData] = useState<any>({
+      recipeName: "",
+      description: "",
+      imageUrl: "",
+      prepTime: 0,
+      prepSteps: [],
+      difficulty: "",
+      estimatedCalories: 0,
+      estimatedCost: 0,
+      ingredients: [],
+      dietaryTags: [],
+    });
 
     const [duplicateMessage, setDuplicateMessage] = useState("");
 
     const waterGoal = 8;
     const today = new Date();
 
-    // --- DATA FETCHING ---
+    //DATA FETCHING
     useEffect(() => {
       const fetchRecipes = async () => {
         const res = await fetch("/api/recipes");
@@ -48,7 +79,7 @@ export function WeeklyPlanner() {
       fetchRecipes();
     }, []);
 
-    // --- LOGIC ---
+    //LOGIC
     const weekStart = useMemo(() => 
       startOfWeek(currentDate, { weekStartsOn: 1 }), 
       [currentDate]
@@ -123,6 +154,87 @@ export function WeeklyPlanner() {
     setIsSelectorOpen(true);
   };
 
+  const handleEditMeal = (e: React.MouseEvent, date: string, slot: number) => {
+    e.stopPropagation();
+    // Just open the selector - don't delete the meal yet
+    // It will be replaced when they select a new recipe
+    setSelectedSlot({ date, slot });
+    setDuplicateMessage("");
+    setIsSelectorOpen(true);
+  };
+
+  const handleDeleteMeal = (e: React.MouseEvent, date: string, slot: number) => {
+    e.stopPropagation();
+    const mealKey = `${date}-${slot}`;
+    setPlannedMeals((prev) => {
+      const updated = { ...prev };
+      delete updated[mealKey];
+      return updated;
+    });
+  };
+
+  const handleEditRecipeClick = (e: React.MouseEvent | React.KeyboardEvent, recipe: any) => {
+    e.stopPropagation();
+    setEditingRecipe(recipe);
+    setEditFormData({
+      recipeName: recipe.name,
+      description: recipe.description || "",
+      imageUrl: recipe.imageUrl || "",
+      prepTime: recipe.prepTimeMinutes || 0,
+      prepSteps: recipe.prepSteps || [],
+      difficulty: recipe.difficulty || "",
+      estimatedCalories: recipe.estimatedCalories || 0,
+      estimatedCost: recipe.estimatedCost || 0,
+      ingredients: recipe.ingredients || [],
+      dietaryTags: recipe.dietaryTags || [],
+    });
+    setIsEditRecipeOpen(true);
+  };
+
+  const handleEditRecipeInputChange = (field: string, value: any) => {
+    setEditFormData((prev: any) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSaveEditRecipe = async () => {
+    if (!editingRecipe) return;
+    setIsLoadingEdit(true);
+    try {
+      const res = await fetch("/api/recipes", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipeId: editingRecipe.id,
+          name: editFormData.recipeName,
+          description: editFormData.description,
+          imageUrl: editFormData.imageUrl,
+          prepTimeMinutes: editFormData.prepTime,
+          prepSteps: editFormData.prepSteps,
+          difficulty: editFormData.difficulty,
+          estimatedCalories: editFormData.estimatedCalories,
+          estimatedCost: editFormData.estimatedCost,
+          ingredients: editFormData.ingredients,
+          dietaryTags: editFormData.dietaryTags,
+        }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        // Update user recipes list
+        setUserRecipes((prev) =>
+          prev.map((r) => (r.id === editingRecipe.id ? updated.recipe : r))
+        );
+        setIsEditRecipeOpen(false);
+        setEditingRecipe(null);
+      }
+    } catch (error) {
+      console.error("Error saving recipe:", error);
+    } finally {
+      setIsLoadingEdit(false);
+    }
+  };
+
   const updateWater = (dateKey: string, delta: number) => {
     setWaterLevels(prev => ({
       ...prev,
@@ -157,7 +269,7 @@ export function WeeklyPlanner() {
     setIsSelectorOpen(false);
   };
 
-  // --- SAVE WEEK LOGIC ---
+  //SAVE WEEK LOGIC
   const [saveStatus, setSaveStatus] = useState<null | 'success' | 'error' | 'saving'>(null);
   
   const handleSaveWeek = async () => {
@@ -267,13 +379,18 @@ export function WeeklyPlanner() {
                   {[1, 2, 3].map((slot) => {
                     const mealKey = `${day.dateKey}-${slot}`;
                     const plannedMeal = plannedMeals[mealKey];
-
+                    if (plannedMeal) {
+                      console.log('Rendering plannedMeal:', JSON.stringify(plannedMeal));
+                    }
+                    const isHovered = hoveredMeal?.date === day.dateKey && hoveredMeal?.slot === slot;
                     return (
                       <button
                         key={slot}
-                        onClick={() => handleAddRecipeClick(day.dateKey, slot)}
-                        className={`w-full py-6 rounded-[1.8rem] flex flex-col items-center justify-center transition-all border-2 
-                          hover:scale-105 active:scale-95 group shadow-sm
+                        onClick={() => !plannedMeal && handleAddRecipeClick(day.dateKey, slot)}
+                        onMouseEnter={() => plannedMeal && setHoveredMeal({ date: day.dateKey, slot })}
+                        onMouseLeave={() => setHoveredMeal(null)}
+                        className={`w-full relative py-6 rounded-[1.8rem] flex flex-col items-center justify-center transition-all border-2 
+                          ${plannedMeal ? 'hover:scale-110' : 'hover:scale-105'} active:scale-95 group shadow-sm
                           ${plannedMeal ? 'border-none shadow-md' : 'border-dashed'}`}
                         style={{
                           backgroundColor: plannedMeal ? 'var(--sage-green)' : 'rgba(168, 181, 160, 0.05)',
@@ -281,14 +398,47 @@ export function WeeklyPlanner() {
                         }}
                       >
                         {plannedMeal ? (
-                          <div className="text-center px-2 animate-in fade-in zoom-in duration-300">
-                            <p className="text-[9px] font-black text-white/70 uppercase tracking-tighter mb-1">
-                              Meal {slot}
-                            </p>
-                            <p className="text-[11px] font-black text-white leading-tight">
-                              {plannedMeal.name || <span style={{fontSize:'10px'}}>Saved Recipe</span>}
-                            </p>
-                          </div>
+                          <>
+                            {/* Content */}
+                            <div className={`text-center px-2 animate-in fade-in zoom-in duration-300 ${isHovered ? 'opacity-30' : 'opacity-100'}`}>
+                              <p className="text-[9px] font-black text-white/70 uppercase tracking-tighter mb-1">
+                                {slotToMealType[slot]}
+                              </p>
+                              <p className="text-[11px] font-black text-white leading-tight">
+                                {plannedMeal.name || <span style={{fontSize:'10px'}}>{JSON.stringify(plannedMeal)}</span>}
+                              </p>
+                            </div>
+                            
+                            {/* Hover Icons */}
+                            {isHovered && (
+                              <div className="absolute inset-0 flex items-center justify-center gap-3 animate-in fade-in duration-200 pointer-events-none">
+                                <div
+                                  onClick={(e) => handleEditMeal(e, day.dateKey, slot)}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleEditMeal(e as any, day.dateKey, slot)}
+                                  role="button"
+                                  tabIndex={0}
+                                  className="p-2 rounded-lg transition-all hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto shadow-md"
+                                  style={{
+                                    backgroundColor: 'var(--lilac-purple)'
+                                  }}
+                                >
+                                  <Pencil className="w-5 h-5 text-white" />
+                                </div>
+                                <div
+                                  onClick={(e) => handleDeleteMeal(e, day.dateKey, slot)}
+                                  onKeyDown={(e) => e.key === 'Enter' && handleDeleteMeal(e as any, day.dateKey, slot)}
+                                  role="button"
+                                  tabIndex={0}
+                                  className="p-2 rounded-lg transition-all hover:scale-110 active:scale-95 cursor-pointer pointer-events-auto shadow-md"
+                                  style={{
+                                    backgroundColor: 'var(--lilac-purple)'
+                                  }}
+                                >
+                                  <Trash2 className="w-5 h-5 text-white" />
+                                </div>
+                              </div>
+                            )}
+                          </>
                         ) : (
                           <Plus className="w-6 h-6 transition-all duration-300 text-gray-200 group-hover:text-[var(--sage-green)] group-hover:rotate-90" />
                         )}
@@ -381,7 +531,18 @@ export function WeeklyPlanner() {
                       {recipe.estimatedCalories || 0} kcal
                     </p>
                   </div>
-                  <Plus className="w-5 h-5 text-gray-200 group-hover:text-[var(--sage-green)] transition-colors" />
+                  <div className="flex items-center gap-2">
+                    <div
+                      onClick={(e) => handleEditRecipeClick(e, recipe)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleEditRecipeClick(e, recipe)}
+                      role="button"
+                      tabIndex={0}
+                      className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <Pencil className="w-4 h-4 text-gray-300 group-hover:text-[var(--lilac-purple)] transition-colors" />
+                    </div>
+                    <Plus className="w-5 h-5 text-gray-200 group-hover:text-[var(--sage-green)] transition-colors" />
+                  </div>
                 </button>
               ))
             ) : (
@@ -389,6 +550,220 @@ export function WeeklyPlanner() {
                 <p className="text-gray-400 text-sm">No recipes found. Add one in the dashboard first!</p>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* EDIT RECIPE DIALOG */}
+      <Dialog open={isEditRecipeOpen} onOpenChange={setIsEditRecipeOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle className="text-2xl font-bold text-gray-800">Edit Recipe</DialogTitle></DialogHeader>
+          <div className="space-y-6 pt-4">
+
+            {/* Basic Info */}
+            <div className="space-y-4">
+              {/* Recipe Name */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">Recipe Name</label>
+                <Input value={editFormData.recipeName} onChange={(e) => handleEditRecipeInputChange("recipeName", e.target.value)} placeholder="e.g., Quinoa Buddha Bowl" className="rounded-xl border-gray-200 focus:border-sage-500 h-11" />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">Description</label>
+                <textarea className="w-full p-3 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition-colors min-h-[80px]" value={editFormData.description} onChange={(e) => handleEditRecipeInputChange("description", e.target.value)} placeholder="A short description of your dish..." />
+              </div>
+
+              {/* Image URL */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                  <span className="flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5 text-gray-400" /> Image URL</span>
+                </label>
+                <Input value={editFormData.imageUrl} onChange={(e) => handleEditRecipeInputChange("imageUrl", e.target.value)} placeholder="https://example.com/photo.jpg" className="rounded-xl border-gray-200 h-11" />
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            {/* Details */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <Utensils className="w-4 h-4" />
+                Details
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {/* Prep Time */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-gray-400" /> Time
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input type="text" inputMode="numeric" value={editFormData.prepTime} onChange={(e) => {const num = parseInt(e.target.value) || 0; handleEditRecipeInputChange("prepTime", num);}} className="rounded-xl border-gray-200 h-11 flex-1" placeholder="0" />
+                    <span className="text-sm font-semibold text-gray-500 w-12 text-center">min</span>
+                  </div>
+                </div>
+
+                {/* Calories */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <Flame className="w-3.5 h-3.5 text-orange-400" /> Calories
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input type="text" inputMode="numeric" value={editFormData.estimatedCalories} onChange={(e) => {const num = parseInt(e.target.value) || 0; handleEditRecipeInputChange("estimatedCalories", num);}} className="rounded-xl border-gray-200 h-11 flex-1" placeholder="0" />
+                    <span className="text-sm font-semibold text-gray-500 w-12 text-center">kcal</span>
+                  </div>
+                </div>
+
+                {/* Cost */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <DollarSign className="w-3.5 h-3.5 text-green-500" /> Cost
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input type="text" inputMode="decimal" value={editFormData.estimatedCost} onChange={(e) => {const num = parseFloat(e.target.value) || 0; handleEditRecipeInputChange("estimatedCost", num);}} className="rounded-xl border-gray-200 h-11 flex-1" placeholder="0.00" />
+                    <span className="text-sm font-semibold text-gray-500 w-8 text-center">$</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Difficulty */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Difficulty</label>
+                <div className="flex gap-2">
+                  {["EASY", "MEDIUM", "HARD"].map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => handleEditRecipeInputChange("difficulty", level)}
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                        editFormData.difficulty === level
+                          ? "text-white shadow-sm"
+                          : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                      }`}
+                      style={editFormData.difficulty === level ? { backgroundColor: "var(--sage-green)", borderColor: "var(--sage-green)" } : {}}
+                    >
+                      {level === "EASY" ? "Easy" : level === "MEDIUM" ? "Medium" : "Hard"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            {/* Ingredients */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <ListOrdered className="w-4 h-4" />
+                Ingredients
+              </div>
+
+              <div className="space-y-2">
+                {(editFormData.ingredients || []).map((ingredient: any, idx: number) => (
+                  <div key={idx} className="flex gap-2 items-center group">
+                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-semibold text-gray-400">{idx + 1}</span>
+                    </div>
+                    <Input type="text" value={ingredient.name || ""} onChange={(e) => { const updated = [...(editFormData.ingredients || [])]; updated[idx] = { ...updated[idx], name: e.target.value }; handleEditRecipeInputChange("ingredients", updated); }} placeholder="Ingredient" className="rounded-xl border-gray-200 h-10 flex-1" />
+                    <Input type="text" value={ingredient.amount || ""} onChange={(e) => { const updated = [...(editFormData.ingredients || [])]; updated[idx] = { ...updated[idx], amount: e.target.value }; handleEditRecipeInputChange("ingredients", updated); }} placeholder="Qty" className="w-20 rounded-xl border-gray-200 h-10 text-center" />
+                    <select value={ingredient.unit || "G"} onChange={(e) => { const updated = [...(editFormData.ingredients || [])]; updated[idx] = { ...updated[idx], unit: e.target.value }; handleEditRecipeInputChange("ingredients", updated); }} className="w-20 rounded-xl border border-gray-200 h-10 text-sm bg-white px-2 focus:outline-none focus:ring-2 focus:ring-sage-200">
+                      <option value="G">g</option>
+                      <option value="ML">ml</option>
+                      <option value="L">l</option>
+                      <option value="OZ">oz</option>
+                      <option value="CUP">cup</option>
+                      <option value="TBSP">tbsp</option>
+                      <option value="TSP">tsp</option>
+                      <option value="COUNT">ct</option>
+                    </select>
+                    {(editFormData.ingredients || []).length > 1 && (
+                      <button type="button" onClick={() => { const updated = (editFormData.ingredients || []).filter((_: any, i: number) => i !== idx); handleEditRecipeInputChange("ingredients", updated); }} className="p-1.5 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X className="w-4 h-4 text-red-400" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => handleEditRecipeInputChange("ingredients", [...(editFormData.ingredients || []), { name: "", amount: "", unit: "G" }])} className="text-sm flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors font-medium" style={{ color: "var(--sage-green)" }}>
+                <Plus className="w-4 h-4" />
+                Add ingredient
+              </button>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            {/* Preparation Steps */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <ChefHat className="w-4 h-4" />
+                Steps
+              </div>
+
+              <div className="space-y-2">
+                {(editFormData.prepSteps || []).map((step: string, idx: number) => (
+                  <div key={idx} className="flex gap-2 items-start group">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-2" style={{ backgroundColor: "color-mix(in srgb, var(--sage-green) 15%, white)" }}>
+                      <span className="text-xs font-bold" style={{ color: "var(--sage-green)" }}>{idx + 1}</span>
+                    </div>
+                    <textarea value={step} onChange={(e) => { const updated = [...(editFormData.prepSteps || [])]; updated[idx] = e.target.value; handleEditRecipeInputChange("prepSteps", updated); }} placeholder={`Step ${idx + 1}...`} className="flex-1 p-2.5 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition-colors min-h-[42px]" rows={1} />
+                    {(editFormData.prepSteps || []).length > 1 && (
+                      <button type="button" onClick={() => { const updated = (editFormData.prepSteps || []).filter((_: any, i: number) => i !== idx); handleEditRecipeInputChange("prepSteps", updated); }} className="p-1.5 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity mt-2">
+                        <X className="w-4 h-4 text-red-400" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={() => handleEditRecipeInputChange("prepSteps", [...(editFormData.prepSteps || []), ""])} className="text-sm flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors font-medium" style={{ color: "var(--sage-green)" }}>
+                <Plus className="w-4 h-4" />
+                Add step
+              </button>
+            </div>
+
+            <hr className="border-gray-100" />
+
+            {/* Dietary Tags */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <Tag className="w-4 h-4" />
+                Tags
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {["VEGAN", "VEGETARIAN", "KETO", "HALAL", "GLUTEN_FREE", "KOSHER", "PESCATARIAN"].map((tag) => {
+                  const isSelected = (editFormData.dietaryTags || []).includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        const currentTags = editFormData.dietaryTags || [];
+                        if (isSelected) {
+                          handleEditRecipeInputChange("dietaryTags", currentTags.filter((t: string) => t !== tag));
+                        } else {
+                          handleEditRecipeInputChange("dietaryTags", [...currentTags, tag]);
+                        }
+                      }}
+                      className={`px-3.5 py-2 rounded-full text-xs font-semibold transition-all border capitalize ${
+                        isSelected
+                          ? "text-white shadow-sm"
+                          : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                      }`}
+                      style={isSelected ? { backgroundColor: "var(--sage-green)", borderColor: "var(--sage-green)" } : {}}
+                    >
+                      {tag.replace('_', ' ').toLowerCase()}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-2 mt-6">
+              <Button variant="outline" onClick={() => setIsEditRecipeOpen(false)} disabled={isLoadingEdit} className="flex-1">Cancel</Button>
+              <Button onClick={handleSaveEditRecipe} disabled={isLoadingEdit} className="flex-1 text-white" style={{ backgroundColor: "var(--sage-green)" }}>{isLoadingEdit ? "Saving..." : "Save Changes"}</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
