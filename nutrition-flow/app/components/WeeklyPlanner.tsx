@@ -34,6 +34,8 @@ export function WeeklyPlanner() {
   const [selectedSlot, setSelectedSlot] = useState<{date: string, slot: number} | null>(null);
   const [userRecipes, setUserRecipes] = useState<any[]>([]);
 
+  const [duplicateMessage, setDuplicateMessage] = useState("");
+
   const waterGoal = 8;
   const today = new Date();
 
@@ -70,6 +72,7 @@ export function WeeklyPlanner() {
 
   const handleAddRecipeClick = (date: string, slot: number) => {
     setSelectedSlot({ date, slot });
+    setDuplicateMessage("");
     setIsSelectorOpen(true);
   };
 
@@ -78,6 +81,35 @@ export function WeeklyPlanner() {
       ...prev,
       [dateKey]: Math.max(0, (prev[dateKey] || 0) + delta)
     }));
+  };
+
+  const handleSelectRecipe = (recipe: any) => {
+    if (!selectedSlot) return;
+
+    const { date, slot } = selectedSlot;
+
+    const isDuplicateInSameDay = [1, 2, 3].some((currentSlot) => {
+      if (currentSlot === slot) return false;
+
+      const mealKey = `${date}-${currentSlot}`;
+      const existingMeal = plannedMeals[mealKey];
+
+      return existingMeal?.id === recipe.id;
+    });
+
+    if (isDuplicateInSameDay) {
+      setDuplicateMessage("You already added this recipe.");
+      return;
+    }
+
+    const mealKey = `${date}-${slot}`;
+    setPlannedMeals((prev) => ({
+      ...prev,
+      [mealKey]: recipe,
+    }));
+
+    setDuplicateMessage("");
+    setIsSelectorOpen(false);
   };
 
   return (
@@ -218,23 +250,21 @@ export function WeeklyPlanner() {
             <p className="text-xs font-medium text-gray-400 uppercase tracking-widest">Add to your Roadmap</p>
           </DialogHeader>
 
+          {duplicateMessage && (
+            <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 mt-2">
+              {duplicateMessage}
+            </p>
+          )}
+
           <div className="grid gap-4 py-4 max-h-[400px] overflow-y-auto pr-2">
             {userRecipes.length > 0 ? (
               userRecipes.map((recipe) => (
                 <button
                   key={recipe.id}
                   className="flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-[var(--sage-green)] hover:bg-[var(--sage-green-light)]/10 transition-all group text-left"
-                  onClick={() => {
-                    if (selectedSlot) {
-                      const mealKey = `${selectedSlot.date}-${selectedSlot.slot}`;
-                      setPlannedMeals(prev => ({
-                        ...prev,
-                        [mealKey]: recipe 
-                      }));
-                    }
-                    setIsSelectorOpen(false);
-                  }}
-                >
+                  onClick={() => handleSelectRecipe(recipe)}
+                  >
+                  
                   <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0">
                     <img src={recipe.imageUrl || "/images/meals.webp"} alt={recipe.name} className="w-full h-full object-cover" />
                   </div>
