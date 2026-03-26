@@ -13,7 +13,7 @@ interface IngredientInput {
   unit: string;
 }
 
-export function AddRecipePlaceholder() {
+export function AddRecipe() {
   const [recipeName, setRecipeName] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -180,14 +180,16 @@ export function AddRecipePlaceholder() {
                 <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-gray-400" /> Time
                 </label>
-                <div className="relative">
+                <div className="flex items-center gap-2">
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={prepTime}
-                    onChange={(e) => setPrepTime(Number(e.target.value))}
-                    className="rounded-xl border-gray-200 h-11 pr-10"
+                    onChange={(e) => setPrepTime(Number(e.target.value) || 0)}
+                    className="rounded-xl border-gray-200 h-11 flex-1"
+                    placeholder="0"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">min</span>
+                  <span className="text-sm font-semibold text-gray-500 w-12 text-center">min</span>
                 </div>
               </div>
 
@@ -196,14 +198,16 @@ export function AddRecipePlaceholder() {
                 <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
                   <Flame className="w-3.5 h-3.5 text-orange-400" /> Calories
                 </label>
-                <div className="relative">
+                <div className="flex items-center gap-2">
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
                     value={estimatedCalories}
-                    onChange={(e) => setEstimatedCalories(Number(e.target.value))}
-                    className="rounded-xl border-gray-200 h-11 pr-10"
+                    onChange={(e) => setEstimatedCalories(Number(e.target.value) || 0)}
+                    className="rounded-xl border-gray-200 h-11 flex-1"
+                    placeholder="0"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">kcal</span>
+                  <span className="text-sm font-semibold text-gray-500 w-12 text-center">kcal</span>
                 </div>
               </div>
 
@@ -212,14 +216,16 @@ export function AddRecipePlaceholder() {
                 <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
                   <DollarSign className="w-3.5 h-3.5 text-green-500" /> Cost
                 </label>
-                <div className="relative">
+                <div className="flex items-center gap-2">
                   <Input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={estimatedCost}
-                    onChange={(e) => setEstimatedCost(Number(e.target.value))}
-                    className="rounded-xl border-gray-200 h-11 pr-6"
+                    onChange={(e) => setEstimatedCost(Number(e.target.value) || 0)}
+                    className="rounded-xl border-gray-200 h-11 flex-1"
+                    placeholder="0.00"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">$</span>
+                  <span className="text-sm font-semibold text-gray-500 w-8 text-center">$</span>
                 </div>
               </div>
             </div>
