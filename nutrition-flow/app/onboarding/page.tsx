@@ -24,6 +24,10 @@ export default function OnboardingPage() {
     dietaryType: [] as string[],
     allergies: [] as string[],
   });
+  const [heightUnit, setHeightUnit] = useState<"cm" | "ft-in">("cm");
+  const [heightFeet, setHeightFeet] = useState("");
+  const [heightInches, setHeightInches] = useState("");
+  const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("lbs");
   // Updates formData every time a user types or picks an option
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -43,6 +47,24 @@ export default function OnboardingPage() {
     try {
       // Database: Handle "none" or blank as an empty array []
       const allergyArray = formData.allergies.includes("NONE") ? [] : formData.allergies;
+      
+      // Convert height to cm if in feet/inches
+      let heightInCm = formData.height;
+      if (heightUnit === "ft-in") {
+        const feet = parseInt(heightFeet) || 0;
+        const inches = parseInt(heightInches) || 0;
+        heightInCm = String(Math.round(feet * 30.48 + inches * 2.54));
+      }
+
+      // Convert weights to kg if in lbs
+      let currentWeightKg = formData.currentWeight;
+      let targetWeightKg = formData.targetWeight;
+      if (weightUnit === "lbs") {
+        currentWeightKg = String(Math.round((parseFloat(formData.currentWeight) / 2.20462) * 100) / 100);
+        if (formData.targetWeight) {
+          targetWeightKg = String(Math.round((parseFloat(formData.targetWeight) / 2.20462) * 100) / 100);
+        }
+      }
 
       const res = await fetch("/api/onboarding", {  //Send formData to backend API 
         method: "POST",
@@ -53,6 +75,9 @@ export default function OnboardingPage() {
           firstName: user.firstName || "",
           lastName: user.lastName || "",
           ...formData,
+          height: heightInCm,
+          currentWeight: currentWeightKg,
+          targetWeight: targetWeightKg,
           allergies: allergyArray,
         }),
       });
@@ -75,9 +100,9 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="flex h-screen font-sans">
+    <div className="flex h-screen font-sans overflow-hidden overscroll-none">
       {/* image with WHITE OVERLAY*/}
-      <div className="hidden lg:flex lg:w-1/3 relative flex-col justify-center items-center p-12 overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/3 lg:h-screen relative flex-col justify-center items-center p-12 overflow-hidden flex-shrink-0">
         <Image
           src="/images/meals.webp"
           alt="Background"
@@ -89,7 +114,7 @@ export default function OnboardingPage() {
         <div className="absolute inset-0 bg-white/90 z-10" />
 
         {/* Logo centered*/}
-        <div className="relative z-20 mt-12">
+        <div className="relative z-20 mt-12 overflow-hidden max-h-[90vh]">
           <Image
             src="/images/logo1.png"
             alt="Logo"
@@ -125,8 +150,8 @@ export default function OnboardingPage() {
 
 
   {/* RIGHT SIDE: Onboarding Form (Sage Green) */}
-      <div className="flex-1 flex flex-col justify-center items-center p-8 bg-sage-green-light overflow-y-auto">
-        <div className="w-full max-w-md space-y-8 py-12">
+      <div className="flex-1 flex flex-col justify-start items-center p-8 bg-sage-green-light overflow-y-auto h-screen">
+        <div className="w-full max-w-md space-y-8 py-8 pb-1">
           <div className="text-center lg:text-left">
             <h2 className="text-3xl mb-2 font-bold">Complete Your Profile</h2>
             <p className="text-muted-foreground">Please fill in the required fields</p>
@@ -147,23 +172,59 @@ export default function OnboardingPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Height (cm) *</label>
-                <input
-                  type="number"
-                  name="height"
-                  required
-                  value={formData.height}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-lg border bg-white"
-                  style={{ borderColor: 'var(--border)' }}
-                />
+                <label className="text-sm font-medium">Height *</label>
+                <div className="flex gap-2">
+                  {heightUnit === "cm" ? (
+                    <div className="flex-1">
+                      <input
+                        type="number"
+                        name="height"
+                        required
+                        value={formData.height}
+                        onChange={handleChange}
+                        placeholder="cm"
+                        className="w-full px-4 py-3 rounded-lg border bg-white"
+                        style={{ borderColor: 'var(--border)' }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex gap-2">
+                      <input
+                        type="number"
+                        value={heightFeet}
+                        onChange={(e) => setHeightFeet(e.target.value)}
+                        placeholder="ft"
+                        required
+                        className="w-1/2 px-4 py-3 rounded-lg border bg-white"
+                        style={{ borderColor: 'var(--border)' }}
+                      />
+                      <input
+                        type="number"
+                        value={heightInches}
+                        onChange={(e) => setHeightInches(e.target.value)}
+                        placeholder="in"
+                        className="w-1/2 px-4 py-3 rounded-lg border bg-white"
+                        style={{ borderColor: 'var(--border)' }}
+                      />
+                    </div>
+                  )}
+                  <select
+                    value={heightUnit}
+                    onChange={(e) => setHeightUnit(e.target.value as "cm" | "ft-in")}
+                    className="px-3 py-3 rounded-lg border bg-white text-sm font-medium"
+                    style={{ borderColor: 'var(--border)' }}
+                  >
+                    <option value="cm">cm</option>
+                    <option value="ft-in">ft/in</option>
+                  </select>
+                </div>
               </div>
             </div>
 
             {/* Weights Section */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Current Weight (lbs) *</label>
+            <div className="flex gap-4 items-end">
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium">Current Weight ({weightUnit}) *</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -176,8 +237,8 @@ export default function OnboardingPage() {
                   style={{ borderColor: 'var(--border)' }}
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Target Weight (lbs)</label>
+              <div className="flex-1 space-y-2">
+                <label className="text-sm font-medium">Target Weight ({weightUnit})</label>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -190,6 +251,15 @@ export default function OnboardingPage() {
                   style={{ borderColor: 'var(--border)' }}
                 />
               </div>
+              <select
+                value={weightUnit}
+                onChange={(e) => setWeightUnit(e.target.value as "kg" | "lbs")}
+                className="px-3 py-3 rounded-lg border bg-white text-sm font-medium"
+                style={{ borderColor: 'var(--border)' }}
+              >
+                <option value="kg">kg</option>
+                <option value="lbs">lbs</option>
+              </select>
             </div>
 
             <div className="space-y-2">
