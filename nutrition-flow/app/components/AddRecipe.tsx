@@ -88,7 +88,10 @@ export function AddRecipe() {
           dietaryTags,
         }),
       });
-      if (!res.ok) throw new Error("Failed to save recipe");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || `Failed to save recipe (${res.status})`);
+      }
       const data = await res.json();
       console.log("saved", data);
       setSubmitted(true);
@@ -105,9 +108,9 @@ export function AddRecipe() {
         setDietaryTags([]);
         setSubmitted(false);
       }, 4000);
-    } catch (err) {
-      console.error(err);
-      alert("There was an error saving the recipe.");
+    } catch (err: any) {
+      console.error("Error saving recipe:", err);
+      alert(`Error: ${err.message || "There was an error saving the recipe."}`);
     }
   };
 
@@ -124,7 +127,7 @@ export function AddRecipe() {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
 
-          {/* ── Section: Basic Info ── */}
+          {/* Basic Info */}
           <div className="space-y-4">
 
             {/* Recipe Name */}
@@ -167,7 +170,7 @@ export function AddRecipe() {
 
           <hr className="border-gray-100" />
 
-          {/* ── Section: Details ── */}
+          {/* Details */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
               <Utensils className="w-4 h-4" />
@@ -255,7 +258,7 @@ export function AddRecipe() {
 
           <hr className="border-gray-100" />
 
-          {/* ── Section: Ingredients ── */}
+          {/* Ingredients */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
               <ListOrdered className="w-4 h-4" />
@@ -321,7 +324,7 @@ export function AddRecipe() {
 
           <hr className="border-gray-100" />
 
-          {/* ── Section: Preparation Steps ── */}
+          {/* Preparation Steps */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
               <ChefHat className="w-4 h-4" />
@@ -366,7 +369,7 @@ export function AddRecipe() {
 
           <hr className="border-gray-100" />
 
-          {/* ── Section: Dietary Tags ── */}
+          {/* Dietary Tags */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
               <Tag className="w-4 h-4" />
