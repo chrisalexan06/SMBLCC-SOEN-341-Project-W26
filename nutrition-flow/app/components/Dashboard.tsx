@@ -57,8 +57,8 @@ export function Dashboard() {
   const GreetingIcon = greeting.icon;
 
   // Weekly progress data (mock)
-  const weekProgress = [85, 72, 83, 0, 0, 0, 0]; // Mon-Sun calorie % hit
-  const todayDayIndex = new Date().getDay(); // 0=Sun, adjust to Mon-start
+  const weekProgress = [85, 72, 83, 0, 0, 0, 0]; 
+  const todayDayIndex = new Date().getDay(); 
   const daysLogged = weekProgress.filter(v => v > 0).length;
 
   // NEW: State for the Fake FYP
@@ -72,7 +72,7 @@ export function Dashboard() {
         if (!res.ok) return;
         const data = await res.json();
         
-        // Shuffle the array and pick the top 3 for the FYP illusion
+       // Shuffle the recipes and take the top 20 for the FYP
         const shuffled = data.sort(() => 0.5 - Math.random());
         setFypRecipes(shuffled.slice(0, 20));
       } catch (error) {

@@ -2,10 +2,19 @@
 CREATE TYPE "ActivityLevel" AS ENUM ('SEDENTARY', 'LIGHT', 'MODERATE', 'ACTIVE', 'VERY_ACTIVE');
 
 -- CreateEnum
-CREATE TYPE "Goal" AS ENUM ('BULK', 'CUT', 'MAINTAIN');
+CREATE TYPE "Goal" AS ENUM ('BULK');
 
 -- CreateEnum
-CREATE TYPE "DietaryType" AS ENUM ('NONE', 'VEGAN', 'VEGETARIAN', 'KETO', 'HALAL', 'GLUTEN_FREE', 'PESCATARIAN');
+CREATE TYPE "MealType" AS ENUM ('BREAKFAST', 'LUNCH', 'DINNER', 'SNACK');
+
+-- CreateEnum
+CREATE TYPE "DayOfWeek" AS ENUM ('SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY');
+
+-- CreateEnum
+CREATE TYPE "DietaryType" AS ENUM ('NONE', 'VEGAN', 'VEGETARIAN', 'KETO', 'HALAL', 'GLUTEN_FREE', 'KOSHER', 'PESCATARIAN');
+
+-- CreateEnum
+CREATE TYPE "Allergy" AS ENUM ('DAIRY', 'EGGS', 'PEANUTS', 'TREE_NUTS', 'SHELLFISH', 'GLUTEN', 'SOY', 'OTHER', 'MILK', 'FISH', 'WHEAT', 'SESAME');
 
 -- CreateEnum
 CREATE TYPE "Difficulty" AS ENUM ('EASY', 'MEDIUM', 'HARD');
@@ -25,8 +34,8 @@ CREATE TABLE "User" (
     "height" DOUBLE PRECISION NOT NULL,
     "activityLevel" "ActivityLevel",
     "goal" "Goal",
-    "dietaryType" "DietaryType",
-    "allergies" TEXT[],
+    "dietaryType" "DietaryType"[] DEFAULT ARRAY[]::"DietaryType"[],
+    "allergies" "Allergy"[] DEFAULT ARRAY[]::"Allergy"[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -62,6 +71,7 @@ CREATE TABLE "Recipe" (
     "userId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "dietaryTags" "DietaryType"[] DEFAULT ARRAY[]::"DietaryType"[],
 
     CONSTRAINT "Recipe_pkey" PRIMARY KEY ("id")
 );
@@ -78,6 +88,29 @@ CREATE TABLE "Ingredient" (
     CONSTRAINT "Ingredient_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "WeeklyPlan" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "weekStartDate" TIMESTAMP(3) NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "WeeklyPlan_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "WeeklyPlanEntry" (
+    "id" TEXT NOT NULL,
+    "weeklyPlanId" TEXT NOT NULL,
+    "dayOfWeek" "DayOfWeek" NOT NULL,
+    "mealType" "MealType" NOT NULL,
+    "recipeId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "WeeklyPlanEntry_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -89,3 +122,12 @@ ALTER TABLE "Recipe" ADD CONSTRAINT "Recipe_userId_fkey" FOREIGN KEY ("userId") 
 
 -- AddForeignKey
 ALTER TABLE "Ingredient" ADD CONSTRAINT "Ingredient_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WeeklyPlan" ADD CONSTRAINT "WeeklyPlan_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WeeklyPlanEntry" ADD CONSTRAINT "WeeklyPlanEntry_weeklyPlanId_fkey" FOREIGN KEY ("weeklyPlanId") REFERENCES "WeeklyPlan"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "WeeklyPlanEntry" ADD CONSTRAINT "WeeklyPlanEntry_recipeId_fkey" FOREIGN KEY ("recipeId") REFERENCES "Recipe"("id") ON DELETE CASCADE ON UPDATE CASCADE;
