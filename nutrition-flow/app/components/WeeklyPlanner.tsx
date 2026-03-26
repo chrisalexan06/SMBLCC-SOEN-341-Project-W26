@@ -23,39 +23,74 @@ import {
 } from "date-fns";
 
 export function WeeklyPlanner() {
-  const router = useRouter();
-  
-  // --- STATE ---
-  
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [waterLevels, setWaterLevels] = useState<Record<string, number>>({});
-  const [plannedMeals, setPlannedMeals] = useState<Record<string, any>>({});
-  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
-  const [selectedSlot, setSelectedSlot] = useState<{date: string, slot: number} | null>(null);
-  const [userRecipes, setUserRecipes] = useState<any[]>([]);
+    // --- STATE ---
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [waterLevels, setWaterLevels] = useState<Record<string, number>>({});
+    const [plannedMeals, setPlannedMeals] = useState<Record<string, any>>({});
+    const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+    const [selectedSlot, setSelectedSlot] = useState<{date: string, slot: number} | null>(null);
+    const [userRecipes, setUserRecipes] = useState<any[]>([]);
 
-  const [duplicateMessage, setDuplicateMessage] = useState("");
+    const [duplicateMessage, setDuplicateMessage] = useState("");
 
-  const waterGoal = 8;
-  const today = new Date();
+    const waterGoal = 8;
+    const today = new Date();
 
-  // --- DATA FETCHING ---
-  useEffect(() => {
-    const fetchRecipes = async () => {
-      const res = await fetch("/api/recipes");
-      if (res.ok) {
-        const data = await res.json();
-        setUserRecipes(data);
-      }
-    };
-    fetchRecipes();
-  }, []);
+    // --- DATA FETCHING ---
+    useEffect(() => {
+      const fetchRecipes = async () => {
+        const res = await fetch("/api/recipes");
+        if (res.ok) {
+          const data = await res.json();
+          setUserRecipes(data);
+        }
+      };
+      fetchRecipes();
+    }, []);
 
-  // --- LOGIC ---
-  const weekStart = useMemo(() => 
-    startOfWeek(currentDate, { weekStartsOn: 1 }), 
-    [currentDate]
-  );
+    // --- LOGIC ---
+    const weekStart = useMemo(() => 
+      startOfWeek(currentDate, { weekStartsOn: 1 }), 
+      [currentDate]
+    );
+
+    // Load saved plan when week changes
+    useEffect(() => {
+      const fetchPlan = async () => {
+        const res = await fetch(`/api/weekly-plan?weekStartDate=${weekStart.toISOString()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.entries) {
+            // Convert API entries to plannedMeals shape
+            const newPlannedMeals: Record<string, any> = {};
+            // Use a day index array starting with MONDAY to match weekStartsOn: 1
+            const dayOrder = ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY","SUNDAY"];
+            data.entries.forEach((entry: any) => {
+              // entry.dayOfWeek is e.g. 'MONDAY', entry.mealType is 'BREAKFAST', 'LUNCH', 'DINNER'
+              // Find the date for this dayOfWeek in the current week
+              const dayIndex = dayOrder.indexOf(entry.dayOfWeek);
+              if (dayIndex !== -1) {
+                const dateObj = new Date(weekStart);
+                dateObj.setDate(dateObj.getDate() + dayIndex);
+                const dateKey = format(dateObj, "yyyy-MM-dd");
+                // Map mealType to slot
+                const slotMap: Record<string, string> = { BREAKFAST: '1', LUNCH: '2', DINNER: '3' };
+                const slot = slotMap[entry.mealType] || '0';
+                if (entry.recipe) {
+                  newPlannedMeals[`${dateKey}-${slot}`] = entry.recipe;
+                }
+              }
+            });
+            setPlannedMeals(newPlannedMeals);
+          } else {
+            setPlannedMeals({});
+          }
+        }
+      };
+      fetchPlan();
+
+    }, [weekStart]);
+    const router = useRouter();
 
   const days = useMemo(() => {
     return Array.from({ length: 7 }).map((_, i) => {
@@ -110,6 +145,43 @@ export function WeeklyPlanner() {
 
     setDuplicateMessage("");
     setIsSelectorOpen(false);
+  };
+
+  // --- SAVE WEEK LOGIC ---
+  const [saveStatus, setSaveStatus] = useState<null | 'success' | 'error' | 'saving'>(null);
+  const handleSaveWeek = async () => {
+    setSaveStatus('saving');
+    // Prepare entries for API
+    const entries = Object.entries(plannedMeals).map(([key, recipe]) => {
+      // key is like '2026-03-26-1', split to get date and slot
+      const [date, slot] = key.split('-');
+      // slot: 1,2,3 → mealType: BREAKFAST, LUNCH, DINNER
+      const mealTypeMap = { '1': 'BREAKFAST', '2': 'LUNCH', '3': 'DINNER' } as const;
+      const mealType = mealTypeMap[slot as keyof typeof mealTypeMap] || 'SNACK';
+      return {
+        dayOfWeek: new Date(date).toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase(),
+        mealType,
+        recipeId: recipe.id,
+      };
+    });
+    try {
+      const res = await fetch('/api/weekly-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStartDate: weekStart.toISOString(),
+          entries,
+        }),
+      });
+      if (res.ok) {
+        setSaveStatus('success');
+        setTimeout(() => setSaveStatus(null), 2000);
+      } else {
+        setSaveStatus('error');
+      }
+    } catch {
+      setSaveStatus('error');
+    }
   };
 
   return (
@@ -174,7 +246,9 @@ export function WeeklyPlanner() {
                   {[1, 2, 3].map((slot) => {
                     const mealKey = `${day.dateKey}-${slot}`;
                     const plannedMeal = plannedMeals[mealKey];
-
+                    if (plannedMeal) {
+                      console.log('Rendering plannedMeal:', JSON.stringify(plannedMeal));
+                    }
                     return (
                       <button
                         key={slot}
@@ -193,7 +267,7 @@ export function WeeklyPlanner() {
                               Meal {slot}
                             </p>
                             <p className="text-[11px] font-black text-white leading-tight">
-                              {plannedMeal.name}
+                              {plannedMeal.name || <span style={{fontSize:'10px'}}>{JSON.stringify(plannedMeal)}</span>}
                             </p>
                           </div>
                         ) : (
@@ -239,6 +313,19 @@ export function WeeklyPlanner() {
               </Card>
             </div>
           ))}
+        </div>
+        {/* Save Week Button */}
+        <div className="flex justify-end mt-8">
+          <Button
+            onClick={handleSaveWeek}
+            disabled={saveStatus === 'saving'}
+            className="px-8 py-3 text-lg font-bold rounded-2xl shadow-md bg-gradient-to-r from-brand-sage to-brand-lilac"
+          >
+            {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'success' ? 'Saved!' : 'Save Week'}
+          </Button>
+          {saveStatus === 'error' && (
+            <span className="ml-4 text-red-600 font-semibold">Error saving week. Try again.</span>
+          )}
         </div>
       </div>
       
