@@ -16,7 +16,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Heart, MessageCircle, MapPin, User, Settings, Calendar, Plus, Flame, Clock, BookOpen, Utensils, ChefHat, Target, Sun, Moon, Sunset, TrendingUp, Sparkles, Droplets } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import Image from "next/image";
-import { AddRecipePlaceholder } from "@/app/components/AddRecipe";
+import { AddRecipe } from "@/app/components/AddRecipe";
 
 const calorieData = [
   { name: "Consumed", value: 1650 },
@@ -461,7 +461,7 @@ export function Dashboard() {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-gray-800">Add Your Recipe</DialogTitle>
           </DialogHeader>
-          <AddRecipePlaceholder />
+          <AddRecipe />
         </DialogContent>
       </Dialog>
     </div>

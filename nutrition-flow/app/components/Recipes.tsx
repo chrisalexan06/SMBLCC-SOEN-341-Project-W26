@@ -8,9 +8,10 @@ import { Badge } from "@/app/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { Input } from "@/app/components/ui/input";
 import { Textarea } from "@/app/components/ui/textarea";
+import { Slider } from "@/app/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Checkbox } from "@/app/components/ui/checkbox";
-import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2, Plus, DollarSign, X } from "lucide-react"; // Cute icons from lucide
+import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2, Plus, DollarSign, X, ImageIcon, FileText, ListOrdered, Tag } from "lucide-react"; // Cute icons from lucide
 import { toast } from "sonner";
 
 export function Recipes({ recipes }: { recipes: any[] }) {
@@ -21,9 +22,9 @@ export function Recipes({ recipes }: { recipes: any[] }) {
   
   //FILTER STATE - VISUAL ONLY
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [timeFilter, setTimeFilter] = useState<string | null>(null);
-  const [costFilter, setCostFilter] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<Set<string>>(new Set());
+  const [timeFilter, setTimeFilter] = useState<number | null>(null);
+  const [costFilter, setCostFilter] = useState<number | null>(null);
 
   //SELECTION STATE
   const [selectedRecipes, setSelectedRecipes] = useState<Set<string>>(new Set());
@@ -54,21 +55,24 @@ export function Recipes({ recipes }: { recipes: any[] }) {
   //FILTER LOGIC
   const filteredRecipes = (recipes || []).filter((recipe) => {
   // Search
-  if (!recipe.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+  if (!recipe.name.toLowerCase().startsWith(searchQuery.toLowerCase())) return false;
 
   // Difficulty (your state stores "Easy"/"Medium"/"Hard", DB stores "EASY"/"MEDIUM"/"HARD")
   if (selectedDifficulty && recipe.difficulty !== selectedDifficulty.toUpperCase()) return false;
 
-  // Time (timeFilter is a string like "30", representing minutes)
-  if (timeFilter && recipe.prepTimeMinutes > parseInt(timeFilter)) return false;
+  // Time (timeFilter is a number representing minutes)
+  if (timeFilter && recipe.prepTimeMinutes > timeFilter) return false;
 
   // Cost
-  if (costFilter && recipe.estimatedCost > parseFloat(costFilter)) return false;
+  if (costFilter && recipe.estimatedCost > costFilter) return false;
 
-  // Dietary tag (your UI uses "Gluten Free", DB stores "GLUTEN_FREE")
-  if (selectedTag) {
-    const normalizedTag = selectedTag.toUpperCase().replace(" ", "_");
-    if (!recipe.dietaryTags?.includes(normalizedTag)) return false;
+  // Dietary tags (your UI uses "Gluten Free", DB stores "GLUTEN_FREE") - show recipe only if it matches ALL selected tags
+  if (selectedTags.size > 0) {
+    const allTagsMatch = Array.from(selectedTags).every((tag) => {
+      const normalizedTag = tag.toUpperCase().replace(" ", "_");
+      return recipe.dietaryTags?.includes(normalizedTag);
+    });
+    if (!allTagsMatch) return false;
   }
 
   return true;
@@ -283,44 +287,48 @@ export function Recipes({ recipes }: { recipes: any[] }) {
 
             <div className="h-6 w-px bg-gray-200 mx-1"></div>
 
-            {/* Time Filter - Dropdown */}
-            <Select value={timeFilter || ""} onValueChange={(v) => setTimeFilter(v === "all" ? null : v)}>
-              <SelectTrigger className={`w-[140px] h-9 text-xs font-medium rounded-lg transition-all ${timeFilter ? "bg-orange-50 text-orange-700 border-orange-200 ring-1 ring-orange-200" : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"}`}>
-                <div className="flex items-center gap-2">
-                  <Clock className={`w-3.5 h-3.5 ${timeFilter ? "text-orange-600" : "text-gray-400"}`} />
-                  <SelectValue placeholder="Time Limit" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Time</SelectItem>
-                <SelectItem value="15">Under 15 mins</SelectItem>
-                <SelectItem value="30">Under 30 mins</SelectItem>
-                <SelectItem value="60">Under 1 hour</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Time Filter - Slider */}
+            <div className="w-[160px] space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-2">
+                  <Clock className="w-3.5 h-3.5 text-orange-400" /> Time Limit:&nbsp;
+                  {timeFilter ? `${timeFilter}m` : "Any"}
+                </label>
+              </div>
+              <Slider
+                value={timeFilter ? [timeFilter] : [120]}
+                onValueChange={(val) => setTimeFilter(val[0] === 120 ? null : val[0])}
+                min={0}
+                max={120}
+                step={5}
+                className="w-full"
+              />
+            </div>
 
-            {/* Cost Filter - Dropdown */}
-            <Select value={costFilter || ""} onValueChange={(v) => setCostFilter(v === "all" ? null : v)}>
-              <SelectTrigger className={`w-[140px] h-9 text-xs font-medium rounded-lg transition-all ${costFilter ? "bg-emerald-50 text-emerald-700 border-emerald-200 ring-1 ring-emerald-200" : "bg-white border-gray-200 text-gray-600 hover:border-gray-300"}`}>
-                 <div className="flex items-center gap-2">
-                   <DollarSign className={`w-3.5 h-3.5 ${costFilter ? "text-emerald-600" : "text-gray-400"}`} />
-                   <SelectValue placeholder="Max Cost" />
-                 </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Price</SelectItem>
-                <SelectItem value="5">Under $5</SelectItem>
-                <SelectItem value="10">Under $10</SelectItem>
-                <SelectItem value="20">Under $20</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Cost Filter - Slider */}
+            <div className="w-[160px] space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-medium text-gray-600 flex items-center gap-2">
+                  <DollarSign className="w-3.5 h-3.5 text-emerald-400" /> Max Cost:&nbsp;
+                  {costFilter ? `$${costFilter}` : "Any"}
+                </label>
+              </div>
+              <Slider
+                value={costFilter ? [costFilter] : [200]}
+                onValueChange={(val) => setCostFilter(val[0] === 200 ? null : val[0])}
+                min={0}
+                max={200}
+                step={1}
+                className="w-full"
+              />
+            </div>
 
             {/* Clear Filters (Only shows if something is selected) */}
-            {(selectedDifficulty || selectedTag || timeFilter || costFilter) && (
+            {(selectedDifficulty || selectedTags.size > 0 || timeFilter || costFilter) && (
               <button 
                 onClick={() => {
                   setSelectedDifficulty(null);
-                  setSelectedTag(null);
+                  setSelectedTags(new Set());
                   setTimeFilter(null);
                   setCostFilter(null);
                 }}
@@ -335,30 +343,45 @@ export function Recipes({ recipes }: { recipes: any[] }) {
           <div className="space-y-2 pt-2">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">Dietary Preferences:</span>
             <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide p-1">
-              {["Vegan", "Vegetarian", "Keto", "Halal", "Gluten Free", "Kosher", "Pescatarian"].map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                  className={`
-                    px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 border
-                    ${selectedTag === tag 
-                      ? "text-white border-transparent shadow-md" 
-                      : "bg-white text-gray-600 border-gray-200 hover:border-sage-300 hover:text-sage-600 hover:bg-gray-50"
-                    }
-                  `}
-                  style={selectedTag === tag ? { background: "linear-gradient(135deg, var(--lilac-purple) 0%, var(--sage-green) 100%)" } : {}}
-                >
-                  {tag}
-                </button>
-              ))}
+              {["Vegan", "Vegetarian", "Keto", "Halal", "Gluten Free", "Kosher", "Pescatarian"].map((tag) => {
+                const isSelected = selectedTags.has(tag);
+                return (
+                  <button
+                    key={tag}
+                    onClick={() => {
+                      const newTags = new Set(selectedTags);
+                      if (newTags.has(tag)) {
+                        newTags.delete(tag);
+                      } else {
+                        newTags.add(tag);
+                      }
+                      setSelectedTags(newTags);
+                    }}
+                    className={`
+                      px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all duration-200 border
+                      ${isSelected
+                        ? "text-white border-transparent shadow-md" 
+                        : "bg-white text-gray-600 border-gray-200 hover:border-sage-300 hover:text-sage-600 hover:bg-gray-50"
+                      }
+                    `}
+                    style={isSelected ? { background: "linear-gradient(135deg, var(--lilac-purple) 0%, var(--sage-green) 100%)" } : {}}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
 
         {/* Recipe Grid */}
-        {filteredRecipes.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+        {filteredRecipes.length === 0 && searchQuery ? (
+          <div className="w-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
             <p className="text-gray-500 italic">No recipes found matching "{searchQuery}"</p>
+          </div>
+        ) : filteredRecipes.length === 0 ? (
+          <div className="w-full text-center py-20 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+            <p className="text-gray-500 italic">No recipes yet.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -485,41 +508,117 @@ export function Recipes({ recipes }: { recipes: any[] }) {
       {/*EDIT RECIPE DIALOG*/}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Edit Recipe</DialogTitle></DialogHeader>
-          <div className="space-y-4 pt-4">
-            {/* Recipe Name */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Recipe Name</label>
-              <Input value={formData.recipeName} onChange={(e) => handleInputChange("recipeName", e.target.value)} />
+          <DialogHeader><DialogTitle className="text-2xl font-bold text-sage-800">Edit Recipe</DialogTitle></DialogHeader>
+          <div className="space-y-6 pt-4">
+
+            {/* ── Section: Basic Info ── */}
+            <div className="space-y-4">
+              {/* Recipe Name */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">Recipe Name</label>
+                <Input value={formData.recipeName} onChange={(e) => handleInputChange("recipeName", e.target.value)} placeholder="e.g., Quinoa Buddha Bowl" className="rounded-xl border-gray-200 focus:border-sage-500 h-11" />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">Description</label>
+                <textarea className="w-full p-3 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition-colors min-h-[80px]" value={formData.description} onChange={(e) => handleInputChange("description", e.target.value)} placeholder="A short description of your dish..." />
+              </div>
+
+              {/* Image URL */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-1.5 block">
+                  <span className="flex items-center gap-1.5"><ImageIcon className="w-3.5 h-3.5 text-gray-400" /> Image URL</span>
+                </label>
+                <Input value={formData.imageUrl} onChange={(e) => handleInputChange("imageUrl", e.target.value)} placeholder="https://example.com/photo.jpg" className="rounded-xl border-gray-200 h-11" />
+              </div>
             </div>
 
-            {/* Description */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Description</label>
-              <Textarea value={formData.description} onChange={(e) => handleInputChange("description", e.target.value)} rows={2} />
+            <hr className="border-gray-100" />
+
+            {/* ── Section: Details ── */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <Utensils className="w-4 h-4" />
+                Details
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {/* Prep Time */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-gray-400" /> Time
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input type="text" inputMode="numeric" value={formData.prepTime} onChange={(e) => {const num = parseInt(e.target.value) || 0; handleInputChange("prepTime", num);}} className="rounded-xl border-gray-200 h-11 flex-1" placeholder="0" />
+                    <span className="text-sm font-semibold text-gray-500 w-12 text-center">min</span>
+                  </div>
+                </div>
+
+                {/* Calories */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <Flame className="w-3.5 h-3.5 text-orange-400" /> Calories
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input type="text" inputMode="numeric" value={formData.estimatedCalories} onChange={(e) => {const num = parseInt(e.target.value) || 0; handleInputChange("estimatedCalories", num);}} className="rounded-xl border-gray-200 h-11 flex-1" placeholder="0" />
+                    <span className="text-sm font-semibold text-gray-500 w-12 text-center">kcal</span>
+                  </div>
+                </div>
+
+                {/* Cost */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <DollarSign className="w-3.5 h-3.5 text-green-500" /> Cost
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Input type="text" inputMode="decimal" value={formData.estimatedCost} onChange={(e) => {const num = parseFloat(e.target.value) || 0; handleInputChange("estimatedCost", num);}} className="rounded-xl border-gray-200 h-11 flex-1" placeholder="0.00" />
+                    <span className="text-sm font-semibold text-gray-500 w-8 text-center">$</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Difficulty */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Difficulty</label>
+                <div className="flex gap-2">
+                  {["EASY", "MEDIUM", "HARD"].map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => handleInputChange("difficulty", level)}
+                      className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                        formData.difficulty === level
+                          ? "text-white shadow-sm"
+                          : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                      }`}
+                      style={formData.difficulty === level ? { backgroundColor: "var(--sage-green)", borderColor: "var(--sage-green)" } : {}}
+                    >
+                      {level === "EASY" ? "Easy" : level === "MEDIUM" ? "Medium" : "Hard"}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Image URL */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Image URL</label>
-              <Input value={formData.imageUrl} onChange={(e) => handleInputChange("imageUrl", e.target.value)} placeholder="https://example.com/image.jpg" />
-            </div>
+            <hr className="border-gray-100" />
 
-            {/* Prep Time */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Preparation Time (minutes)</label>
-              <Input type="number" value={formData.prepTime} onChange={(e) => handleInputChange("prepTime", parseInt(e.target.value) || 0)} />
-            </div>
+            {/* ── Section: Ingredients ── */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <ListOrdered className="w-4 h-4" />
+                Ingredients
+              </div>
 
-            {/* Ingredients */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Ingredients</label>
               <div className="space-y-2">
                 {(formData.ingredients || []).map((ingredient: any, idx: number) => (
-                  <div key={idx} className="flex gap-2">
-                    <Input type="text" value={ingredient.name || ""} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], name: e.target.value }; handleInputChange("ingredients", updated); }} placeholder="Name" className="flex-1" />
-                    <Input type="text" value={ingredient.amount || ""} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], amount: e.target.value }; handleInputChange("ingredients", updated); }} placeholder="Amount" className="w-24" />
-                    <select value={ingredient.unit || "G"} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], unit: e.target.value }; handleInputChange("ingredients", updated); }} className="w-24 border rounded-lg p-2">
+                  <div key={idx} className="flex gap-2 items-center group">
+                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-semibold text-gray-400">{idx + 1}</span>
+                    </div>
+                    <Input type="text" value={ingredient.name || ""} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], name: e.target.value }; handleInputChange("ingredients", updated); }} placeholder="Ingredient" className="rounded-xl border-gray-200 h-10 flex-1" />
+                    <Input type="text" value={ingredient.amount || ""} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], amount: e.target.value }; handleInputChange("ingredients", updated); }} placeholder="Qty" className="w-20 rounded-xl border-gray-200 h-10 text-center" />
+                    <select value={ingredient.unit || "G"} onChange={(e) => { const updated = [...(formData.ingredients || [])]; updated[idx] = { ...updated[idx], unit: e.target.value }; handleInputChange("ingredients", updated); }} className="w-20 rounded-xl border border-gray-200 h-10 text-sm bg-white px-2 focus:outline-none focus:ring-2 focus:ring-sage-200">
                       <option value="G">g</option>
                       <option value="ML">ml</option>
                       <option value="L">l</option>
@@ -527,78 +626,87 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                       <option value="CUP">cup</option>
                       <option value="TBSP">tbsp</option>
                       <option value="TSP">tsp</option>
+                      <option value="COUNT">ct</option>
                     </select>
+                    {(formData.ingredients || []).length > 1 && (
+                      <button type="button" onClick={() => { const updated = (formData.ingredients || []).filter((_, i) => i !== idx); handleInputChange("ingredients", updated); }} className="p-1.5 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <X className="w-4 h-4 text-red-400" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
-              <button type="button" onClick={() => handleInputChange("ingredients", [...(formData.ingredients || []), { name: "", amount: "", unit: "G" }])} className="mt-2 text-sm flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100" style={{ color: "var(--sage-green)" }}>
+              <button type="button" onClick={() => handleInputChange("ingredients", [...(formData.ingredients || []), { name: "", amount: "", unit: "G" }])} className="text-sm flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors font-medium" style={{ color: "var(--sage-green)" }}>
                 <Plus className="w-4 h-4" />
-                Add Ingredient
+                Add ingredient
               </button>
             </div>
 
-            {/* Preparation Steps */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Preparation Steps</label>
+            <hr className="border-gray-100" />
+
+            {/* ── Section: Preparation Steps ── */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <ChefHat className="w-4 h-4" />
+                Steps
+              </div>
+
               <div className="space-y-2">
                 {(formData.prepSteps || []).map((step: string, idx: number) => (
-                  <div key={idx} className="flex gap-2 items-center">
-                    <span className="text-sm">{idx + 1}.</span>
-                    <Input type="text" value={step} onChange={(e) => { const updated = [...(formData.prepSteps || [])]; updated[idx] = e.target.value; handleInputChange("prepSteps", updated); }} placeholder="Describe step" className="flex-1" />
+                  <div key={idx} className="flex gap-2 items-start group">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-2" style={{ backgroundColor: "color-mix(in srgb, var(--sage-green) 15%, white)" }}>
+                      <span className="text-xs font-bold" style={{ color: "var(--sage-green)" }}>{idx + 1}</span>
+                    </div>
+                    <textarea value={step} onChange={(e) => { const updated = [...(formData.prepSteps || [])]; updated[idx] = e.target.value; handleInputChange("prepSteps", updated); }} placeholder={`Step ${idx + 1}...`} className="flex-1 p-2.5 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition-colors min-h-[42px]" rows={1} />
+                    {(formData.prepSteps || []).length > 1 && (
+                      <button type="button" onClick={() => { const updated = (formData.prepSteps || []).filter((_, i) => i !== idx); handleInputChange("prepSteps", updated); }} className="p-1.5 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity mt-2">
+                        <X className="w-4 h-4 text-red-400" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
-              <button type="button" onClick={() => handleInputChange("prepSteps", [...(formData.prepSteps || []), ""])} className="mt-2 text-sm flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100" style={{ color: "var(--sage-green)" }}>
+              <button type="button" onClick={() => handleInputChange("prepSteps", [...(formData.prepSteps || []), ""])} className="text-sm flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors font-medium" style={{ color: "var(--sage-green)" }}>
                 <Plus className="w-4 h-4" />
-                Add Step
+                Add step
               </button>
             </div>
 
-            {/* Difficulty & Estimates */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Difficulty</label>
-                <Select value={formData.difficulty} onValueChange={(v) => handleInputChange("difficulty", v)}>
-                  <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
-                  <SelectContent><SelectItem value="EASY">Easy</SelectItem><SelectItem value="MEDIUM">Medium</SelectItem><SelectItem value="HARD">Hard</SelectItem></SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Calories Estimate</label>
-                <Input type="number" value={formData.estimatedCalories} onChange={(e) => handleInputChange("estimatedCalories", parseInt(e.target.value) || 0)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Cost Estimate</label>
-                <Input type="number" step="0.01" value={formData.estimatedCost} onChange={(e) => handleInputChange("estimatedCost", parseFloat(e.target.value) || 0)} />
-              </div>
-            </div>
+            <hr className="border-gray-100" />
 
-            {/* Dietary Tags */}
-            <div>
-              <label className="text-sm font-medium mb-2 block">Dietary Tags</label>
-              <div className="grid grid-cols-2 gap-2">
-                {["VEGAN", "VEGETARIAN", "KETO", "HALAL", "GLUTEN_FREE", "KOSHER", "PESCATARIAN"].map((tag) => (
-                  <div key={tag} className="flex items-center space-x-2">
-                    <Checkbox 
-                      id={`edit-${tag}`}
-                      checked={(formData.dietaryTags || []).includes(tag)}
-                      onCheckedChange={(checked) => {
+            {/* ── Section: Dietary Tags ── */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-gray-400 uppercase tracking-wider">
+                <Tag className="w-4 h-4" />
+                Tags
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {["VEGAN", "VEGETARIAN", "KETO", "HALAL", "GLUTEN_FREE", "KOSHER", "PESCATARIAN"].map((tag) => {
+                  const isSelected = (formData.dietaryTags || []).includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
                         const currentTags = formData.dietaryTags || [];
-                        if (checked) {
-                           handleInputChange("dietaryTags", [...currentTags, tag]);
+                        if (isSelected) {
+                          handleInputChange("dietaryTags", currentTags.filter((t: string) => t !== tag));
                         } else {
-                           handleInputChange("dietaryTags", currentTags.filter((t: string) => t !== tag));
+                          handleInputChange("dietaryTags", [...currentTags, tag]);
                         }
                       }}
-                    />
-                    <label 
-                      htmlFor={`edit-${tag}`} 
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 capitalize"
+                      className={`px-3.5 py-2 rounded-full text-xs font-semibold transition-all border capitalize ${
+                        isSelected
+                          ? "text-white shadow-sm"
+                          : "bg-white text-gray-500 border-gray-200 hover:bg-gray-50"
+                      }`}
+                      style={isSelected ? { backgroundColor: "var(--sage-green)", borderColor: "var(--sage-green)" } : {}}
                     >
                       {tag.replace('_', ' ').toLowerCase()}
-                    </label>
-                  </div>
-                ))}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

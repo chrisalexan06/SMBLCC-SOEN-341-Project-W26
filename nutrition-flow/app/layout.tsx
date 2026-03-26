@@ -33,7 +33,7 @@ export default function RootLayout({
     >
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-y-scroll`}
       >
         {/* clerk header from setup online
         <nav className="flex justify-between items-center w-full px-8 py-4 bg-brand-sage text-white shadow-md">

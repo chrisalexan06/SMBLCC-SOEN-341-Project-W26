@@ -1,5 +1,45 @@
 @import "tailwindcss";
 
+html {
+  scrollbar-gutter: stable;
+  width: 100%;
+}
+
+body {
+  scrollbar-gutter: stable;
+  width: 100%;
+}
+
+/* Prevent layout shift when dialogs open */
+body[style*="overflow: hidden"] {
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+  width: 100% !important;
+}
+
+/* Hide number input spinners but keep functionality */
+input[type="number"] {
+  -moz-appearance: textfield;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+  display: none;
+}
+
+input[type="number"]:focus {
+  outline: none;
+}
+
+/* Ensure inputs are always clickable and typeable */
+input {
+  pointer-events: auto !important;
+}
+
 :root {
   /* Brand Colors */
   --background: #ffffff;
@@ -111,8 +151,13 @@
   --radius-sm: calc(var(--radius) - 4px);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  scrollbar-gutter: stable;
 }
