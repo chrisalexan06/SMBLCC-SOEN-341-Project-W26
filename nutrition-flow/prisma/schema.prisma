@@ -27,6 +27,7 @@ model User {
   recipes       Recipe[]
   WaterLog      WaterLog[]
   weeklyPlans   WeeklyPlan[]
+  waterLogs     WaterLog[]     // Added to support reverse relation
 }
 
 model Meal {
