@@ -60,22 +60,33 @@ export function WeeklyPlanner() {
         const res = await fetch(`/api/weekly-plan?weekStartDate=${weekStart.toISOString()}`);
         if (res.ok) {
           const data = await res.json();
+
+          // --- Hydration Loading ---
+          if (data.waterLogs) {
+            const mappedWater: Record<string, number> = {};
+            data.waterLogs.forEach((log: any) => {
+              mappedWater[log.date] = log.amount;
+            });
+            setWaterLevels(mappedWater);
+          } else {
+            setWaterLevels({});
+          }
+
           if (data && data.entries) {
             // Convert API entries to plannedMeals shape
             const newPlannedMeals: Record<string, any> = {};
             // Use a day index array starting with MONDAY to match weekStartsOn: 1
             const dayOrder = ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY","SUNDAY"];
             data.entries.forEach((entry: any) => {
-              // entry.dayOfWeek is e.g. 'MONDAY', entry.mealType is 'BREAKFAST', 'LUNCH', 'DINNER'
-              // Find the date for this dayOfWeek in the current week
               const dayIndex = dayOrder.indexOf(entry.dayOfWeek);
               if (dayIndex !== -1) {
                 const dateObj = new Date(weekStart);
                 dateObj.setDate(dateObj.getDate() + dayIndex);
                 const dateKey = format(dateObj, "yyyy-MM-dd");
-                // Map mealType to slot
+                
                 const slotMap: Record<string, string> = { BREAKFAST: '1', LUNCH: '2', DINNER: '3' };
                 const slot = slotMap[entry.mealType] || '0';
+                
                 if (entry.recipe) {
                   newPlannedMeals[`${dateKey}-${slot}`] = entry.recipe;
                 }
@@ -90,7 +101,8 @@ export function WeeklyPlanner() {
       fetchPlan();
 
     }, [weekStart]);
-    const router = useRouter();
+
+  const router = useRouter();
 
   const days = useMemo(() => {
     return Array.from({ length: 7 }).map((_, i) => {
@@ -125,10 +137,8 @@ export function WeeklyPlanner() {
 
     const isDuplicateInSameDay = [1, 2, 3].some((currentSlot) => {
       if (currentSlot === slot) return false;
-
       const mealKey = `${date}-${currentSlot}`;
       const existingMeal = plannedMeals[mealKey];
-
       return existingMeal?.id === recipe.id;
     });
 
@@ -149,21 +159,31 @@ export function WeeklyPlanner() {
 
   // --- SAVE WEEK LOGIC ---
   const [saveStatus, setSaveStatus] = useState<null | 'success' | 'error' | 'saving'>(null);
+  
   const handleSaveWeek = async () => {
     setSaveStatus('saving');
+    
     // Prepare entries for API
     const entries = Object.entries(plannedMeals).map(([key, recipe]) => {
-      // key is like '2026-03-26-1', split to get date and slot
-      const [date, slot] = key.split('-');
-      // slot: 1,2,3 → mealType: BREAKFAST, LUNCH, DINNER
+      
+      const lastDashIndex = key.lastIndexOf('-');
+      const dateKey = key.substring(0, lastDashIndex); 
+      const slot = key.substring(lastDashIndex + 1);   
+
+      const [year, month, day] = dateKey.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day);
+      const dayOfWeek = format(localDate, "EEEE").toUpperCase(); 
+
       const mealTypeMap = { '1': 'BREAKFAST', '2': 'LUNCH', '3': 'DINNER' } as const;
       const mealType = mealTypeMap[slot as keyof typeof mealTypeMap] || 'SNACK';
+      
       return {
-        dayOfWeek: new Date(date).toLocaleDateString('en-US', { weekday: 'long' }).toUpperCase(),
+        dayOfWeek,
         mealType,
         recipeId: recipe.id,
       };
     });
+
     try {
       const res = await fetch('/api/weekly-plan', {
         method: 'POST',
@@ -171,6 +191,7 @@ export function WeeklyPlanner() {
         body: JSON.stringify({
           weekStartDate: weekStart.toISOString(),
           entries,
+          waterLevels, // Passes water straight to the backend
         }),
       });
       if (res.ok) {
@@ -231,7 +252,7 @@ export function WeeklyPlanner() {
               {/* MEAL PLAN CARD */}
               <Card 
                 className={`p-6 flex flex-col h-[450px] rounded-[2.8rem] border-2 transition-all duration-300 
-                    hover:-translate-y-2 hover:shadow-2xl ${day.isToday ? 'bg-white shadow-xl scale-[1.02] border-[var(--sage-green)]' : 'bg-white/90 border-transparent'}`} 
+                  hover:-translate-y-2 hover:shadow-2xl ${day.isToday ? 'bg-white shadow-xl scale-[1.02] border-[var(--sage-green)]' : 'bg-white/90 border-transparent'}`} 
                 style={{ cursor: 'pointer' }}
               >
                 <div className="mb-8">
@@ -246,9 +267,7 @@ export function WeeklyPlanner() {
                   {[1, 2, 3].map((slot) => {
                     const mealKey = `${day.dateKey}-${slot}`;
                     const plannedMeal = plannedMeals[mealKey];
-                    if (plannedMeal) {
-                      console.log('Rendering plannedMeal:', JSON.stringify(plannedMeal));
-                    }
+
                     return (
                       <button
                         key={slot}
@@ -267,7 +286,7 @@ export function WeeklyPlanner() {
                               Meal {slot}
                             </p>
                             <p className="text-[11px] font-black text-white leading-tight">
-                              {plannedMeal.name || <span style={{fontSize:'10px'}}>{JSON.stringify(plannedMeal)}</span>}
+                              {plannedMeal.name || <span style={{fontSize:'10px'}}>Saved Recipe</span>}
                             </p>
                           </div>
                         ) : (
@@ -314,6 +333,7 @@ export function WeeklyPlanner() {
             </div>
           ))}
         </div>
+        
         {/* Save Week Button */}
         <div className="flex justify-end mt-8">
           <Button
