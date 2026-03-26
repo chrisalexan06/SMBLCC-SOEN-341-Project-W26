@@ -185,6 +185,7 @@ export function AddRecipe() {
                 </label>
                 <div className="flex items-center gap-2">
                   <Input
+                    data-testid="prep-time"
                     type="text"
                     inputMode="numeric"
                     value={prepTime}
@@ -203,6 +204,7 @@ export function AddRecipe() {
                 </label>
                 <div className="flex items-center gap-2">
                   <Input
+                    data-testid="estimated-calories"
                     type="text"
                     inputMode="numeric"
                     value={estimatedCalories}
@@ -221,6 +223,7 @@ export function AddRecipe() {
                 </label>
                 <div className="flex items-center gap-2">
                   <Input
+                    data-testid="estimated-cost"
                     type="text"
                     inputMode="decimal"
                     value={estimatedCost}
@@ -406,6 +409,7 @@ export function AddRecipe() {
 
           {/* Submit Button */}
           <Button
+            data-testid="save-recipe-button"
             type="submit"
             className="w-full text-white rounded-xl h-12 text-sm font-semibold shadow-sm"
             style={{ backgroundColor: "var(--sage-green)" }}

@@ -244,6 +244,7 @@ export function Dashboard() {
 
               <div className="w-full flex flex-col gap-2">
                 <Button
+                  data-testid = "add-new-recipe-button"
                   onClick={() => setIsAddRecipeOpen(true)}
                   className="w-full text-white shadow-none h-auto py-2.5 rounded-xl flex items-center justify-center transition-all duration-300 gap-2"
                   style={{ backgroundColor: "var(--sage-green)" }}

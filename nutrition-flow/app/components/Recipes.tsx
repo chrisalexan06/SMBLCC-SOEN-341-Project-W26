@@ -210,6 +210,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
         
         {/* Search Bar and Delete Button */}
         <div className="flex items-center gap-4 mb-8">
+
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
@@ -220,6 +221,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+
           {deleteSuccessMessage ? (
             <div className="flex items-center gap-3 px-4 py-2 rounded-lg" style={{ backgroundColor: "var(--sage-green-light)" }}>
               <span className="text-sm font-medium" style={{ color: "var(--sage-green-dark)" }}>
@@ -227,11 +229,13 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               </span>
             </div>
           ) : selectedRecipes.size > 0 ? (
+
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-600">
                 {selectedRecipes.size} selected
               </span>
               <Button
+                data-testid="delete-selected-button"
                 variant="destructive"
                 size="sm"
                 onClick={handleDeleteSelected}
@@ -242,7 +246,9 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                 {isDeleting ? "Deleting..." : "Delete"}
               </Button>
             </div>
+
           ) : null}
+
         </div>
 
         {/* --- FILTERS SECTION --- */}
@@ -391,6 +397,8 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                 {/* Checkbox - Top Left */}
                 <div className="absolute top-3 left-3 z-10">
                   <Checkbox
+                    data-testid={`select-recipe-${recipe.name}`}
+                    name={`${recipe.name}`}
                     checked={selectedRecipes.has(recipe.id)}
                     onCheckedChange={() => handleToggleSelection(recipe.id)}
                     className="w-5 h-5"
