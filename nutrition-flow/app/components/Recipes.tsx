@@ -472,6 +472,20 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                 <div className="flex items-center gap-2"><DollarSign className="text-sage-600" style={{width: '16px', height: '16px'}}/> ${viewingRecipe.estimatedCost || 0}</div>
               </div>
 
+              {/* Dietary Tags */}
+              {viewingRecipe.dietaryTags && viewingRecipe.dietaryTags.length > 0 && (
+                <div>
+                  <h4 className="flex items-center gap-2 font-bold text-lg mb-3"><Tag className="w-5 h-5 text-sage-600" /> Dietary Tags</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {viewingRecipe.dietaryTags.map((tag: string) => (
+                      <Badge key={tag} variant="outline" className="text-sm text-sage-600 border-sage-200 bg-sage-50">
+                        {tag.replace(/_/g, ' ')}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Ingredients */}
               <div>
                 <h4 className="flex items-center gap-2 font-bold text-lg mb-3"><Utensils className="w-5 h-5 text-sage-600" /> Ingredients</h4>
