@@ -656,7 +656,7 @@ export function WeeklyPlanner() {
                       <option value="COUNT">ct</option>
                     </select>
                     {(editFormData.ingredients || []).length > 1 && (
-                      <button type="button" onClick={() => { const updated = (editFormData.ingredients || []).filter((_, i) => i !== idx); handleEditRecipeInputChange("ingredients", updated); }} className="p-1.5 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button type="button" onClick={() => { const updated = (editFormData.ingredients || []).filter((_: any, i: number) => i !== idx); handleEditRecipeInputChange("ingredients", updated); }} className="p-1.5 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                         <X className="w-4 h-4 text-red-400" />
                       </button>
                     )}
@@ -686,7 +686,7 @@ export function WeeklyPlanner() {
                     </div>
                     <textarea value={step} onChange={(e) => { const updated = [...(editFormData.prepSteps || [])]; updated[idx] = e.target.value; handleEditRecipeInputChange("prepSteps", updated); }} placeholder={`Step ${idx + 1}...`} className="flex-1 p-2.5 border border-gray-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition-colors min-h-[42px]" rows={1} />
                     {(editFormData.prepSteps || []).length > 1 && (
-                      <button type="button" onClick={() => { const updated = (editFormData.prepSteps || []).filter((_, i) => i !== idx); handleEditRecipeInputChange("prepSteps", updated); }} className="p-1.5 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity mt-2">
+                      <button type="button" onClick={() => { const updated = (editFormData.prepSteps || []).filter((_: any, i: number) => i !== idx); handleEditRecipeInputChange("prepSteps", updated); }} className="p-1.5 hover:bg-red-50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity mt-2">
                         <X className="w-4 h-4 text-red-400" />
                       </button>
                     )}
