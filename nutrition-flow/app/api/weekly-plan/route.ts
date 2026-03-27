@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing weekStartDate or entries" }, { status: 400 });
     }
 
-    // 1. Upsert the weekly plan
+    // 1. Upsert the weekly planning entry for the user and week
     const plan = await prisma.weeklyPlan.upsert({
       where: { userId_weekStartDate: { userId, weekStartDate: new Date(weekStartDate) } },
       update: {},
