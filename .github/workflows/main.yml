@@ -35,11 +35,16 @@ jobs:
       - name: Build application
         run: npm run build
         env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_TEST }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_TEST }}
 
       - name: Run E2E tests
         run: npx playwright test --config=nutrition-flow/playwright.config.ts
         env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_TEST }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_TEST }}
           CLERK_TEST_USER_EMAIL: ${{ secrets.CLERK_TEST_USER_EMAIL }}
