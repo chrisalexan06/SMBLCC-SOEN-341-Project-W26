@@ -19,7 +19,7 @@ export async function signIn(page: Page) {
 
   await page.waitForURL('/dashboard', { timeout: 60000 }).catch(async () => {
     console.log('Final URL:', page.url())
-    await page.screenshot({ path: 'e2e/debug-3-after-submit.png' })
+    
   })
 }
 
