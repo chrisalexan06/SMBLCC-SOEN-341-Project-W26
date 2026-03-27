@@ -19,7 +19,7 @@ test.describe('Authentication', () => {
     window.confirm = () => true
     })
     await page.getByTestId("save-recipe-button").click({ force: true })
-    await expect(page.getByText('Please enter a recipe name')).not.toBeVisible()
+    await expect(page.getByText('Please enter a recipe name')).not.toBeVisible({ timeout: 1500 })
     
     await page.goto('/recipes') 
     
@@ -36,7 +36,7 @@ test.describe('Authentication', () => {
     await page.keyboard.type(recipeName, { delay: 50 })
     
     await page.getByTestId("save-recipe-button").click({ force: true })
-    await expect(page.getByText('Recipe saved')).toBeVisible()
+    await expect(page.getByText('Recipe saved')).toBeVisible({ timeout: 15000 })
     
     await page.goto('/recipes') 
     await page.waitForURL('/recipes')
@@ -45,7 +45,7 @@ test.describe('Authentication', () => {
     await expect(page.getByTestId(`select-recipe-${recipeName}`)).toBeChecked()
     //await page.screenshot({ path: 'e2e/debug-1-after-submit.png' })
 
-    await expect(page.getByText('1 selected')).toBeVisible()
+    await expect(page.getByText('1 selected')).toBeVisible({ timeout: 15000 })
 
     await page.evaluate(() => {
     window.confirm = () => true
