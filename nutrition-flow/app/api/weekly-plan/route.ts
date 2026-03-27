@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { randomUUID } from "crypto";
 
 // GET: Fetch weekly plan and water logs for a user and week
 export async function GET(req: Request) {
@@ -87,7 +88,7 @@ export async function POST(req: Request) {
         await prisma.waterLog.upsert({
           where: { userId_date: { userId, date: dateKey } },
           update: { amount: amount as number },
-          create: { userId, date: dateKey, amount: amount as number }
+          create: { id: randomUUID(), userId, date: dateKey, amount: amount as number }
         });
       }
     }
