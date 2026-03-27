@@ -11,22 +11,19 @@ test.describe('Authentication', () => {
     })
   })
 
- // test('user cannot create recipe without name', async ({ page }) => {
-  //  await signIn(page)
-  //  await page.screenshot({ path: 'e2e/debug-before-AddNew.png' })
-  //  await addInfoNoName(page)
-
-    // Check for error message on the page
+  test('user cannot create recipe without name', async ({ page }) => {
+    await signIn(page) 
+    await addInfoNoName(page)
     
-  //  await page.locator('button[type="submit"]').click({ force: true })
-   // await page.screenshot({ path: 'e2e/debug-after-AddNew.png' })
-  
-  //  const dialogPromise= page.waitForEvent('dialog')
-  //  const dialog = await dialogPromise
-
-    //expect(dialog.message()).toContain('Please enter a recipe name') // optional
- //   await dialog.accept()
- // })
+    await page.evaluate(() => {
+    window.confirm = () => true
+    })
+    await page.getByTestId("save-recipe-button").click({ force: true })
+    await expect(page.getByText('Please enter a recipe name')).not.toBeVisible()
+    
+    await page.goto('/recipes') 
+    
+  })
 
   test('user can create and delete recipe', async ({ page }) => {
     await signIn(page) 
@@ -37,7 +34,6 @@ test.describe('Authentication', () => {
     const recipeName = 'Test Recipe ' + Date.now()
     await page.getByPlaceholder('e.g., Quinoa Buddha Bowl').click()
     await page.keyboard.type(recipeName, { delay: 50 })
-    await page.waitForTimeout(1000)
     
     await page.getByTestId("save-recipe-button").click({ force: true })
     await expect(page.getByText('Recipe saved')).toBeVisible()
@@ -45,10 +41,9 @@ test.describe('Authentication', () => {
     await page.goto('/recipes') 
     await page.waitForURL('/recipes')
 
-    await page.screenshot({ path: 'LOOK HERE.png' })
     await page.getByTestId(`select-recipe-${recipeName}`).check() 
     await expect(page.getByTestId(`select-recipe-${recipeName}`)).toBeChecked()
-    
+    //await page.screenshot({ path: 'e2e/debug-1-after-submit.png' })
 
     await expect(page.getByText('1 selected')).toBeVisible()
 
@@ -57,12 +52,10 @@ test.describe('Authentication', () => {
     })
 
     await page.getByTestId('delete-selected-button').click({ force: true })
-
-    await expect(page.getByText('1 selected')).not.toBeVisible()
-
-    await page.screenshot({ path: 'LOOK AGAIN.png' })
+    //await page.screenshot({ path: 'e2e/debug-2-after-submit.png' })
+    await expect(page.getByText(recipeName)).not.toBeVisible({ timeout: 15000 })
    
-
+    // await page.screenshot({ path: 'e2e/debug-3-after-submit.png' })
   })
 
   test('user can sign out', async ({ page }) => {

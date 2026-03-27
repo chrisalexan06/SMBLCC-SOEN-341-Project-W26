@@ -25,7 +25,6 @@ model User {
   updatedAt     DateTime       @updatedAt
   meals         Meal[]
   recipes       Recipe[]
-  WaterLog      WaterLog[]
   weeklyPlans   WeeklyPlan[]
   waterLogs     WaterLog[]     // Added to support reverse relation
 }
