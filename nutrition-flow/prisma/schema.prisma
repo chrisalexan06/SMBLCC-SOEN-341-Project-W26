@@ -114,6 +114,8 @@ enum ActivityLevel {
 
 enum Goal {
   BULK
+  CUT
+  MAINTAIN
 }
 
 enum MealType {

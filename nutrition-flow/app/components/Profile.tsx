@@ -7,7 +7,7 @@ import {
   SignedIn,
   SignedOut,
   UserButton, } from '@clerk/nextjs';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
@@ -16,17 +16,113 @@ import { ArrowLeft, User } from "lucide-react";
 
 export function Profile() {
   const router = useRouter();
-  const [weight, setWeight] = useState("150");
-  const [height, setHeight] = useState("5'8\"");
+
+  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState<any>(null);
+  const [age, setAge] = useState(""); 
+  const [height, setHeight] = useState("");
+  const [goal, setGoal] = useState("");
+  const [dietaryTypes, setDietaryTypes] = useState({
+    vegan: false,
+    vegetarian: false,
+    keto: false,
+    halal: false,
+    gluten_free: false,
+    kosher: false,
+    pescatarian: false,
+  });
   const [allergies, setAllergies] = useState({
     peanuts: false,
     gluten: false,
+    shellfish: false,
+    soy: false,
+    eggs: false,
+    treeNuts: false,
+    wheat: false,
+    fish: false,
+    milk: false,
+    sesame: false,
   });
 
-  const handleSave = () => {
-    // Mock save functionality
-    alert("Settings saved successfully!");
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+      const res = await fetch("/api/user/sync"); 
+      const data = await res.json();
+
+      if (res.ok && data ) {
+        setUserData(data);
+
+        setHeight(data.height?.toString() || "");
+        setAge(data.age ? data.age.toString() : "");
+        setGoal(data.goal || "");
+
+        if (data.dietaryType) {
+            const updatedDiets: any = { ...dietaryTypes };
+            data.dietaryType.forEach((type: string) => {
+              const key = type.toLowerCase().replace(" ", "_");
+              if (Object.prototype.hasOwnProperty.call(updatedDiets, key)) {
+                updatedDiets[key] = true;
+              }
+            });
+            setDietaryTypes(updatedDiets);
+          }
+
+        if (data.allergies) {
+            const updatedAllergies: any = { ...allergies };
+            data.allergies.forEach((allergy: string) => {
+              const key = allergy.toLowerCase().replace(" ", "_");
+              if (Object.prototype.hasOwnProperty.call(updatedAllergies, key)) {
+                updatedAllergies[key] = true;
+              }
+            });
+            setAllergies(updatedAllergies);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProfile();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch("/api/onboarding", { // Reusing onboarding upsert logic
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          age: parseInt(age) || 0,
+          height: parseFloat(height) || 0,
+          goal: goal,
+          dietaryType: Object.keys(dietaryTypes)
+            .filter(key => (dietaryTypes as any)[key])
+            .map(key => key.toUpperCase()),
+          allergies: Object.keys(allergies)
+            .filter(key => (allergies as any)[key])
+            .map(key => key.toUpperCase()) 
+        }),
+      });
+
+      if (response.ok) {
+        alert("Settings saved successfully!");
+      } else {
+        alert("Failed to save settings.");
+      }
+    } catch (error) {
+      alert("Error saving data.");
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-lg">Loading Profile Settings...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,73 +156,30 @@ export function Profile() {
       {/* Main Content */}
       <main className="max-w-3xl mx-auto p-6">
         <div className="space-y-6">
-          {/* Profile Picture Section */}
-          <Card className="p-6 rounded-2xl">
-            <h3 className="mb-6">Profile Picture</h3>
-            <div className="flex items-center gap-6">
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center text-4xl"
-                style={{ backgroundColor: "var(--lilac-purple-light)" }}
-              >
-                👤
-              </div>
-              <div className="flex-1">
-                <Button
-                  variant="outline"
-                  className="mr-3"
-                  style={{ borderColor: "var(--sage-green)" }}
-                >
-                  Upload Photo
-                </Button>
-                <Button variant="ghost" className="text-muted-foreground">
-                  Remove
-                </Button>
-              </div>
-            </div>
-          </Card>
-
           {/* Personal Information */}
           <Card className="p-6 rounded-2xl">
             <h3 className="mb-6">Personal Information</h3>
             <div className="space-y-4">
               <div>
-                <label className="block mb-2">Full Name</label>
-                <input
-                  type="text"
-                  defaultValue="Alex Johnson"
-                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: "var(--border)",
-                    "--tw-ring-color": "var(--sage-green)",
-                  } as React.CSSProperties}
-                />
-              </div>
-              <div>
                 <label className="block mb-2">Email</label>
                 <input
                   type="email"
-                  defaultValue="alex.johnson@university.edu"
-                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: "var(--border)",
-                    "--tw-ring-color": "var(--sage-green)",
-                  } as React.CSSProperties}
+                  defaultValue={userData?.email || ""}
+                  disabled
+                  className="w-full px-4 py-3 rounded-lg border bg-gray-100 cursor-not-allowed"
                 />
               </div>
+              <div>
+              <label className="block mb-2 text-sm font-medium">Age</label>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-[var(--sage-green)]"
+                placeholder="Enter your age"
+              />
+            </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block mb-2">Weight (lbs)</label>
-                  <input
-                    type="text"
-                    value={weight}
-                    onChange={(e) => setWeight(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
-                    style={{
-                      borderColor: "var(--border)",
-                      "--tw-ring-color": "var(--sage-green)",
-                    } as React.CSSProperties}
-                  />
-                </div>
                 <div>
                   <label className="block mb-2">Height</label>
                   <input
@@ -144,114 +197,58 @@ export function Profile() {
             </div>
           </Card>
 
+        <Card className="p-6 rounded-2xl">
+            <h3 className="mb-4 font-semibold">Fitness Goal</h3>
+            <select
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-[var(--sage-green)]"
+            >
+              <option value="">Select a Goal</option>
+              <option value="BULK">Bulk</option>
+              <option value="CUT">Cut</option>
+              <option value="MAINTAIN">Maintain</option>
+            </select>
+          </Card>
           {/* Dietary Preferences */}
           <Card className="p-6 rounded-2xl">
-            <h3 className="mb-6">Dietary Preferences</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block mb-2">Daily Calorie Goal</label>
-                <input
-                  type="text"
-                  defaultValue="2000"
-                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: "var(--border)",
-                    "--tw-ring-color": "var(--sage-green)",
-                  } as React.CSSProperties}
-                />
-              </div>
-              <div>
-                <label className="block mb-2">Diet Type</label>
-                <select
-                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: "var(--border)",
-                    "--tw-ring-color": "var(--sage-green)",
-                  } as React.CSSProperties}
-                >
-                  <option>None</option>
-                  <option>Vegetarian</option>
-                  <option>Vegan</option>
-                  <option>Pescatarian</option>
-                  <option>Keto</option>
-                  <option>Paleo</option>
-                </select>
-              </div>
+            <h3 className="mb-6 font-semibold">Dietary Preferences</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.keys(dietaryTypes).map((dietKey) => (
+                <div key={dietKey} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 border">
+                  <span className="text-sm font-medium capitalize">
+                    {dietKey.replace("_", " ")}
+                  </span>
+                  <Switch
+                    checked={(dietaryTypes as any)[dietKey]}
+                    onCheckedChange={(checked) =>
+                      setDietaryTypes({ ...dietaryTypes, [dietKey]: checked })
+                    }
+                    className="data-[state=checked]:bg-[var(--sage-green)]"
+                  />
+                </div>
+              ))}
             </div>
           </Card>
 
           {/* Allergies */}
           <Card className="p-6 rounded-2xl">
-            <h3 className="mb-6">Allergies & Restrictions</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
-                <div className="flex-1">
-                  <div className="mb-1">Peanuts</div>
-                  <div className="text-sm text-muted-foreground">
-                    Alert me about peanut ingredients
-                  </div>
+            <h3 className="mb-6 font-semibold">Allergies & Restrictions</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Object.keys(allergies).map((allergyKey) => (
+                <div key={allergyKey} className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
+                  <span className="text-sm font-medium capitalize">
+                    {allergyKey.replace("_", " ")}
+                  </span>
+                  <Switch
+                    checked={(allergies as any)[allergyKey]}
+                    onCheckedChange={(checked) =>
+                      setAllergies({ ...allergies, [allergyKey]: checked })
+                    }
+                    className="data-[state=checked]:bg-[var(--sage-green)]"
+                  />
                 </div>
-                <Switch
-                  checked={allergies.peanuts}
-                  onCheckedChange={(checked) =>
-                    setAllergies({ ...allergies, peanuts: checked })
-                  }
-                  className="data-[state=checked]:bg-[var(--sage-green)]"
-                />
-              </div>
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
-                <div className="flex-1">
-                  <div className="mb-1">Gluten</div>
-                  <div className="text-sm text-muted-foreground">
-                    Alert me about gluten ingredients
-                  </div>
-                </div>
-                <Switch
-                  checked={allergies.gluten}
-                  onCheckedChange={(checked) =>
-                    setAllergies({ ...allergies, gluten: checked })
-                  }
-                  className="data-[state=checked]:bg-[var(--sage-green)]"
-                />
-              </div>
-              <Button
-                variant="outline"
-                className="w-full"
-                style={{ borderColor: "var(--sage-green)", color: "var(--sage-green-dark)" }}
-              >
-                Add More Allergies
-              </Button>
-            </div>
-          </Card>
-
-          {/* Privacy Settings */}
-          <Card className="p-6 rounded-2xl">
-            <h3 className="mb-6">Privacy Settings</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
-                <div className="flex-1">
-                  <div className="mb-1">Public Profile</div>
-                  <div className="text-sm text-muted-foreground">
-                    Make your meals visible to all users
-                  </div>
-                </div>
-                <Switch
-                  defaultChecked
-                  className="data-[state=checked]:bg-[var(--sage-green)]"
-                />
-              </div>
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50">
-                <div className="flex-1">
-                  <div className="mb-1">Share Location</div>
-                  <div className="text-sm text-muted-foreground">
-                    Show nearby restaurants in your area
-                  </div>
-                </div>
-                <Switch
-                  defaultChecked
-                  className="data-[state=checked]:bg-[var(--sage-green)]"
-                />
-              </div>
+              ))}
             </div>
           </Card>
 
