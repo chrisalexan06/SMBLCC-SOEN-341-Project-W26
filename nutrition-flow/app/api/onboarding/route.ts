@@ -14,9 +14,9 @@ export async function POST(req: Request) {
 
     //we need to convert the data
     //so we use parse functions to convert strings to numbers where necessary
-    const ageInt = parseInt(body.age);
-    const weightFloat = parseFloat(body.currentWeight);
-    const heightFloat = parseFloat(body.height);
+    const ageInt = parseInt(body.age)|| 0;
+    const weightFloat = parseFloat(body.currentWeight)|| 0;
+    const heightFloat = parseFloat(body.height)|| 0;
 
     //in case clerk doesnrt have a name, to follow our schema rules and to prevent db from breaking
     const firstName = user.firstName || "New";
