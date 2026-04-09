@@ -90,7 +90,7 @@ export function Profile() {
 
   const handleSave = async () => {
     try {
-      const response = await fetch("/api/onboarding", { // Reusing onboarding upsert logic
+      const response = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -102,7 +102,7 @@ export function Profile() {
             .map(key => key.toUpperCase()),
           allergies: Object.keys(allergies)
             .filter(key => (allergies as any)[key])
-            .map(key => key.toUpperCase()) 
+            .map(key => key.toUpperCase())
         }),
       });
 
@@ -115,6 +115,7 @@ export function Profile() {
       alert("Error saving data.");
     }
   };
+
 
   if (loading) {
     return (
@@ -252,14 +253,14 @@ export function Profile() {
             </div>
           </Card>
 
-          {/* Save Button */}
+          {/* Action Buttons */}
           <div className="flex gap-4">
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/dashboard")}
             >
-              Cancel
+              Back to Dashboard
             </Button>
             <Button
               className="flex-1 text-white"
