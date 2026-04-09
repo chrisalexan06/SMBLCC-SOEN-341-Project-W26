@@ -385,6 +385,7 @@ export function WeeklyPlanner() {
                     const isHovered = hoveredMeal?.date === day.dateKey && hoveredMeal?.slot === slot;
                     return (
                       <button
+                        data-testid={`meal-slot-${day.dateKey}-${slot}`}
                         key={slot}
                         onClick={() => !plannedMeal && handleAddRecipeClick(day.dateKey, slot)}
                         onMouseEnter={() => plannedMeal && setHoveredMeal({ date: day.dateKey, slot })}
