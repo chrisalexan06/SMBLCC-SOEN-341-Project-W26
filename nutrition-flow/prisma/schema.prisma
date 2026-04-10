@@ -27,6 +27,7 @@ model User {
   recipes       Recipe[]
   weeklyPlans   WeeklyPlan[]
   waterLogs     WaterLog[]     // Added to support reverse relation
+  savedRecipes  SavedRecipe[]
 }
 
 model Meal {
@@ -59,6 +60,19 @@ model Recipe {
   ingredients       Ingredient[]
   user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   weeklyPlanEntries WeeklyPlanEntry[]
+  savedByUsers      SavedRecipe[]
+}
+
+model SavedRecipe {
+  id        String   @id @default(uuid())
+  userId    String
+  recipeId  String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, recipeId])
 }
 
 model Ingredient {

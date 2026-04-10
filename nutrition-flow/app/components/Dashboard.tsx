@@ -14,7 +14,29 @@ import {
   CarouselPrevious,
 } from "@/app/components/ui/carousel";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { Heart, MessageCircle, MapPin, User, Settings, Calendar, Plus, Flame, Clock, BookOpen, Utensils, ChefHat, Target, Sun, Moon, Sunset, TrendingUp, Sparkles, Droplets } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  MapPin,
+  User,
+  Settings,
+  Calendar,
+  Plus,
+  Flame,
+  Clock,
+  BookOpen,
+  Utensils,
+  ChefHat,
+  Target,
+  Sun,
+  Moon,
+  Sunset,
+  TrendingUp,
+  Sparkles,
+  Droplets,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import Image from "next/image";
 import { AddRecipe } from "@/app/components/AddRecipe";
@@ -68,6 +90,8 @@ export function Dashboard() {
 
   // NEW: State for the Fake FYP
   const [fypRecipes, setFypRecipes] = useState<any[]>([]);
+  const [savedRecipeIds, setSavedRecipeIds] = useState<Set<string>>(new Set());
+  const [savingRecipeIds, setSavingRecipeIds] = useState<Set<string>>(new Set());
 
   // NEW: Fetch and shuffle recipes for the FYP filtered by user's dietary restrictions and allergies
   useEffect(() => {
@@ -179,6 +203,74 @@ export function Dashboard() {
 
     fetchAndShuffleFYP();
   }, []);
+
+  useEffect(() => {
+  const fetchSavedRecipes = async () => {
+    try {
+      const response = await fetch("/api/saved-recipes");
+
+      if (!response.ok) {
+        return;
+      }
+
+      const savedRecipes = await response.json();
+      const ids = new Set<string>(
+        savedRecipes.map((item: any) => item.recipeId ?? item.recipe?.id)
+      );
+
+      setSavedRecipeIds(ids);
+    } catch (error) {
+      console.error("Failed to load saved recipes:", error);
+    }
+  };
+
+  fetchSavedRecipes();
+}, []);
+
+const handleToggleSaveRecipe = async (
+  recipeId: string,
+  e: React.MouseEvent
+) => {
+  e.stopPropagation();
+
+  if (savingRecipeIds.has(recipeId)) return;
+
+  setSavingRecipeIds((prev) => new Set(prev).add(recipeId));
+
+  const isSaved = savedRecipeIds.has(recipeId);
+
+  try {
+    const response = await fetch("/api/saved-recipes", {
+      method: isSaved ? "DELETE" : "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ recipeId }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update saved recipes");
+    }
+
+    setSavedRecipeIds((prev) => {
+      const updated = new Set(prev);
+      if (isSaved) {
+        updated.delete(recipeId);
+      } else {
+        updated.add(recipeId);
+      }
+      return updated;
+    });
+  } catch (error) {
+    console.error("Failed to update saved recipes:", error);
+  } finally {
+    setSavingRecipeIds((prev) => {
+      const updated = new Set(prev);
+      updated.delete(recipeId);
+      return updated;
+    });
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -447,6 +539,23 @@ export function Dashboard() {
 
           {/* Middle Column - MODERN CAROUSEL FEED */}
           <div className="lg:col-span-6 flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+  <div>
+    <h3 className="text-lg font-semibold text-gray-800">For You</h3>
+    <p className="text-xs text-muted-foreground">
+      Save recipes to review later
+    </p>
+  </div>
+
+  <Button
+    variant="outline"
+    className="rounded-xl"
+    onClick={() => router.push("/saved-recipes")}
+  >
+    <Bookmark className="w-4 h-4 mr-2" />
+    Review Saved
+  </Button>
+</div>
 
              <Carousel
                 opts={{
@@ -461,12 +570,29 @@ export function Dashboard() {
                       <CarouselItem key={recipe.id} className="basis-full">
                         <Card 
                             key={recipe.id} 
-                            className="overflow-hidden rounded-3xl border border-gray-100 shadow-sm bg-white group cursor-pointer flex flex-col h-full"
+                            className="relative overflow-hidden rounded-3xl border border-gray-100 shadow-sm bg-white group cursor-pointer flex flex-col h-full"
                             onClick={() => {
                               setViewingRecipe(recipe);
                               setIsViewDialogOpen(true);
                             }}
+                            
                           >
+                            <button
+  type="button"
+  onClick={(e) => handleToggleSaveRecipe(recipe.id, e)}
+  disabled={savingRecipeIds.has(recipe.id)}
+  className="absolute top-3 right-3 z-10 rounded-full bg-white/90 hover:bg-white shadow-md p-2 transition"
+  aria-label={savedRecipeIds.has(recipe.id) ? "Unsave recipe" : "Save recipe"}
+>
+  {savedRecipeIds.has(recipe.id) ? (
+    <BookmarkCheck
+      className="w-4 h-4"
+      style={{ color: "var(--sage-green)" }}
+    />
+  ) : (
+    <Bookmark className="w-4 h-4 text-gray-700" />
+  )}
+</button>
                             {/* Image Area */}
                             <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden flex items-center justify-center">
                               <img 
