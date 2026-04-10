@@ -173,6 +173,7 @@ export function Profile() {
               <div>
               <label className="block mb-2 text-sm font-medium">Age</label>
               <input
+                data-testid="age-input"
                 type="number"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
