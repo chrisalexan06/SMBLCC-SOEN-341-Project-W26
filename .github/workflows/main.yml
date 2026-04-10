@@ -23,8 +23,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      # Root (Playwright, tooling) + nutrition-flow (Next.js app deps e.g. @vis.gl/react-google-maps)
       - name: Install dependencies
-        run: npm install 
+        run: |
+          npm install
+          npm install --prefix nutrition-flow
 
       - name: Update schema
         run: npx prisma generate --schema=nutrition-flow/prisma/schema.prisma
