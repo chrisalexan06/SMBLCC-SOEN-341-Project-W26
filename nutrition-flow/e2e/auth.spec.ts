@@ -132,8 +132,7 @@ test.describe('Unique Features', () => {
       await signIn(page)
       await page.goto('/profile')
       await page.waitForURL('/profile')
-      await page.getByTestId('age-input').click()
-      await page.keyboard.type('30', { delay: 50 })
+      await page.getByTestId('age-input').fill('30')
 
       await page.getByText('Save Changes').click()
       await expect(page.getByText('Settings saved successfully!')).toBeVisible({ timeout: 10000 })
