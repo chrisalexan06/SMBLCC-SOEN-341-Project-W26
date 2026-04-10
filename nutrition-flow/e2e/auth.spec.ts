@@ -111,3 +111,18 @@ test.describe('Recipe Functions', () => {
     // await page.screenshot({ path: 'e2e/debug-3-after-submit.png' })
   })
 })
+
+test.describe('Unique Features', () => {
+  test('user can favorite a recipe', async ({ page }) => {
+    await signIn(page) 
+
+    await page.getByTestId("save-button").first().click({ force: true })
+    await page.waitForTimeout(500)
+
+    await page.getByText("Review Saved").click({ force: true })
+    await page.waitForTimeout(500)
+
+    await expect(page.getByText("No saved recipes yet")).not.toBeVisible({ timeout: 10000 })
+
+  })
+  })
