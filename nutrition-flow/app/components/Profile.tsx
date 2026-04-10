@@ -19,9 +19,22 @@ export function Profile() {
 
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
+  const [notification, setNotification] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const [age, setAge] = useState(""); 
   const [height, setHeight] = useState("");
+  // Added height unit state to support cm or feet/inch input and display.
+  const [heightUnit, setHeightUnit] = useState<"cm" | "ft-in">("cm");
+  const [heightFeet, setHeightFeet] = useState("");
+  const [heightInches, setHeightInches] = useState("");
+  const [currentWeight, setCurrentWeight] = useState("");
+  const [targetWeight, setTargetWeight] = useState("");
+  // Added weight unit state so profile can show kg or lbs consistently.
+  const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
   const [goal, setGoal] = useState("");
+  const [activityLevel, setActivityLevel] = useState("");
   const [dietaryTypes, setDietaryTypes] = useState({
     vegan: false,
     vegetarian: false,
@@ -55,12 +68,15 @@ export function Profile() {
 
         setHeight(data.height?.toString() || "");
         setAge(data.age ? data.age.toString() : "");
+        setCurrentWeight(data.currentWeight?.toString() || "");
+        setTargetWeight(data.targetWeight?.toString() || "");
         setGoal(data.goal || "");
+        setActivityLevel(data.activityLevel || "");
 
         if (data.dietaryType) {
             const updatedDiets: any = { ...dietaryTypes };
             data.dietaryType.forEach((type: string) => {
-              const key = type.toLowerCase().replace(" ", "_");
+              const key = type.toLowerCase().replace("/\s/g", "_");
               if (Object.prototype.hasOwnProperty.call(updatedDiets, key)) {
                 updatedDiets[key] = true;
               }
@@ -71,14 +87,14 @@ export function Profile() {
         if (data.allergies) {
             const updatedAllergies: any = { ...allergies };
             data.allergies.forEach((allergy: string) => {
-              const key = allergy.toLowerCase().replace(" ", "_");
+              const key = allergy.toLowerCase().replace("/\s/g", "_");
               if (Object.prototype.hasOwnProperty.call(updatedAllergies, key)) {
                 updatedAllergies[key] = true;
               }
             });
             setAllergies(updatedAllergies);
           }
-        }
+      }
       } catch (error) {
         console.error("Failed to load profile:", error);
       } finally {
@@ -88,14 +104,90 @@ export function Profile() {
     loadProfile();
   }, []);
 
+  // Conversion helpers for height and weight unit switching.
+  const convertKgToLbs = (kg: number) => Math.round((kg * 2.20462) * 10) / 10;
+  const convertLbsToKg = (lbs: number) => Math.round((lbs / 2.20462) * 10) / 10;
+  const convertCmToFeetInches = (cm: number) => {
+    const feet = Math.floor(cm / 30.48);
+    const inches = Math.round((cm / 2.54) - feet * 12);
+    return { feet, inches };
+  };
+  const convertFeetInchesToCm = (feet: number, inches: number) =>
+    Math.round((feet * 30.48 + inches * 2.54) * 10) / 10;
+
+  const handleHeightUnitChange = (unit: "cm" | "ft-in") => {
+    // Switches display/input mode between cm and ft/in, converting values immediately.
+    if (unit === heightUnit) return;
+    if (unit === "ft-in") {
+      const cmValue = parseFloat(height);
+      if (!Number.isNaN(cmValue)) {
+        const { feet, inches } = convertCmToFeetInches(cmValue);
+        setHeightFeet(String(feet));
+        setHeightInches(String(inches));
+      }
+    } else {
+      const feet = parseInt(heightFeet) || 0;
+      const inches = parseInt(heightInches) || 0;
+      const cmValue = convertFeetInchesToCm(feet, inches);
+      setHeight(String(cmValue.toString()));
+    }
+    setHeightUnit(unit);
+  };
+
+  const handleWeightUnitChange = (unit: "kg" | "lbs") => {
+    // Switches weight display between kg and lbs, converting both current and target weight.
+    if (unit === weightUnit) return;
+    const currentValue = parseFloat(currentWeight);
+    if (!Number.isNaN(currentValue)) {
+      setCurrentWeight(
+        unit === "lbs"
+          ? String(convertKgToLbs(currentValue))
+          : String(convertLbsToKg(currentValue)),
+      );
+    }
+
+    if (targetWeight) {
+      const targetValue = parseFloat(targetWeight);
+      if (!Number.isNaN(targetValue)) {
+        setTargetWeight(
+          unit === "lbs"
+            ? String(convertKgToLbs(targetValue))
+            : String(convertLbsToKg(targetValue)),
+        );
+      }
+    }
+
+    setWeightUnit(unit);
+  };
+
   const handleSave = async () => {
     try {
+      setNotification(null);
+      // Convert display units back into metric values before saving to the backend.
+      const heightValue =
+        heightUnit === "ft-in"
+          ? convertFeetInchesToCm(parseInt(heightFeet) || 0, parseInt(heightInches) || 0)
+          : parseFloat(height) || 0;
+      const currentWeightKg =
+        weightUnit === "lbs"
+          ? convertLbsToKg(parseFloat(currentWeight) || 0)
+          : parseFloat(currentWeight) || 0;
+      const targetWeightKg =
+        targetWeight && weightUnit === "lbs"
+          ? convertLbsToKg(parseFloat(targetWeight))
+          : targetWeight
+          ? parseFloat(targetWeight)
+          : undefined;
+
       const response = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           age: parseInt(age) || 0,
-          height: parseFloat(height) || 0,
+          height: heightValue,
+          currentWeight: currentWeightKg,
+          targetWeight: targetWeightKg,
+          activityLevel: activityLevel || undefined,
           goal: goal,
           dietaryType: Object.keys(dietaryTypes)
             .filter(key => (dietaryTypes as any)[key])
@@ -107,12 +199,12 @@ export function Profile() {
       });
 
       if (response.ok) {
-        alert("Settings saved successfully!");
+        setNotification({ type: "success", message: "Settings saved successfully!" });
       } else {
-        alert("Failed to save settings.");
+        setNotification({ type: "error", message: "Failed to save settings." });
       }
     } catch (error) {
-      alert("Error saving data.");
+      setNotification({ type: "error", message: "Error saving data." });
     }
   };
 
@@ -157,6 +249,17 @@ export function Profile() {
       {/* Main Content */}
       <main className="max-w-3xl mx-auto p-6">
         <div className="space-y-6">
+          {notification ? (
+            <div
+              className={`rounded-2xl border px-4 py-3 text-sm font-medium ${
+                notification.type === "success"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                  : "border-rose-200 bg-rose-50 text-rose-800"
+              }`}
+            >
+              {notification.message}
+            </div>
+          ) : null}
           {/* Personal Information */}
           <Card className="p-6 rounded-2xl">
             <h3 className="mb-6">Personal Information</h3>
@@ -173,6 +276,7 @@ export function Profile() {
               <div>
               <label className="block mb-2 text-sm font-medium">Age</label>
               <input
+                data-testid="age-input"
                 type="number"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
@@ -181,18 +285,111 @@ export function Profile() {
               />
             </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div className="space-y-2">
                   <label className="block mb-2">Height</label>
+                  {heightUnit === "cm" ? (
+                    <input
+                      type="text"
+                      value={height}
+                      onChange={(e) => setHeight(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
+                      style={{
+                        borderColor: "var(--border)",
+                        "--tw-ring-color": "var(--sage-green)",
+                      } as React.CSSProperties}
+                      placeholder="Height in cm"
+                    />
+                  ) : (
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={heightFeet}
+                        onChange={(e) => {
+                          setHeightFeet(e.target.value);
+                          const feet = parseInt(e.target.value) || 0;
+                          const inches = parseInt(heightInches) || 0;
+                          setHeight(String(convertFeetInchesToCm(feet, inches)));
+                        }}
+                        className="w-1/2 px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
+                        style={{
+                          borderColor: "var(--border)",
+                          "--tw-ring-color": "var(--sage-green)",
+                        } as React.CSSProperties}
+                        placeholder="ft"
+                      />
+                      <input
+                        type="text"
+                        value={heightInches}
+                        onChange={(e) => {
+                          setHeightInches(e.target.value);
+                          const feet = parseInt(heightFeet) || 0;
+                          const inches = parseInt(e.target.value) || 0;
+                          setHeight(String(convertFeetInchesToCm(feet, inches)));
+                        }}
+                        className="w-1/2 px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
+                        style={{
+                          borderColor: "var(--border)",
+                          "--tw-ring-color": "var(--sage-green)",
+                        } as React.CSSProperties}
+                        placeholder="in"
+                      />
+                    </div>
+                  )}
+                  <select
+                    value={heightUnit}
+                    onChange={(e) => handleHeightUnitChange(e.target.value as "cm" | "ft-in")}
+                    className="mt-2 w-full px-4 py-3 rounded-lg border focus:ring-2"
+                    style={{
+                      borderColor: "var(--border)",
+                      "--tw-ring-color": "var(--sage-green)",
+                    } as React.CSSProperties}
+                  >
+                    <option value="cm">cm</option>
+                    <option value="ft-in">ft/in</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-2">Current Weight ({weightUnit})</label>
                   <input
                     type="text"
-                    value={height}
-                    onChange={(e) => setHeight(e.target.value)}
+                    value={currentWeight}
+                    onChange={(e) => setCurrentWeight(e.target.value)}
                     className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
                     style={{
                       borderColor: "var(--border)",
                       "--tw-ring-color": "var(--sage-green)",
                     } as React.CSSProperties}
+                    placeholder={`Enter your current weight in ${weightUnit}`}
                   />
+                </div>
+                <div>
+                  <label className="block mb-2">Target Weight ({weightUnit})</label>
+                  <input
+                    type="text"
+                    value={targetWeight}
+                    onChange={(e) => setTargetWeight(e.target.value)}
+                    className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
+                    style={{
+                      borderColor: "var(--border)",
+                      "--tw-ring-color": "var(--sage-green)",
+                    } as React.CSSProperties}
+                    placeholder={`Enter your target weight in ${weightUnit}`}
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2">Weight Unit</label>
+                  <select
+                    value={weightUnit}
+                    onChange={(e) => handleWeightUnitChange(e.target.value as "kg" | "lbs")}
+                    className="w-full px-4 py-3 rounded-lg border focus:ring-2"
+                    style={{
+                      borderColor: "var(--border)",
+                      "--tw-ring-color": "var(--sage-green)",
+                    } as React.CSSProperties}
+                  >
+                    <option value="kg">kg</option>
+                    <option value="lbs">lbs</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -200,16 +397,33 @@ export function Profile() {
 
         <Card className="p-6 rounded-2xl">
             <h3 className="mb-4 font-semibold">Fitness Goal</h3>
-            <select
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
-              className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-[var(--sage-green)]"
-            >
-              <option value="">Select a Goal</option>
-              <option value="BULK">Bulk</option>
-              <option value="CUT">Cut</option>
-              <option value="MAINTAIN">Maintain</option>
-            </select>
+            <div className="space-y-4">
+              <select
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-[var(--sage-green)]"
+              >
+                <option value="">Select a Goal</option>
+                <option value="BULK">Bulk</option>
+                <option value="CUT">Cut</option>
+                <option value="MAINTAIN">Maintain</option>
+              </select>
+              <div>
+                <label className="block mb-2">Activity Level</label>
+                <select
+                  value={activityLevel}
+                  onChange={(e) => setActivityLevel(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-[var(--sage-green)]"
+                >
+                  <option value="">Select activity level</option>
+                  <option value="SEDENTARY">Sedentary</option>
+                  <option value="LIGHT">Light activity</option>
+                  <option value="MODERATE">Moderate activity</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="VERY_ACTIVE">Very active</option>
+                </select>
+              </div>
+            </div>
           </Card>
           {/* Dietary Preferences */}
           <Card className="p-6 rounded-2xl">

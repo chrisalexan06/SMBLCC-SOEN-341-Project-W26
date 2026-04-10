@@ -14,9 +14,10 @@ export async function POST(req: Request) {
 
     //we need to convert the data
     //so we use parse functions to convert strings to numbers where necessary
-    const ageInt = parseInt(body.age)|| 0;
-    const weightFloat = parseFloat(body.currentWeight)|| 0;
-    const heightFloat = parseFloat(body.height)|| 0;
+    const ageInt = parseInt(body.age) || 0;
+    const weightFloat = parseFloat(body.currentWeight) || 0;
+    const targetWeightFloat = body.targetWeight ? parseFloat(body.targetWeight) : undefined;
+    const heightFloat = parseFloat(body.height) || 0;
 
     //in case clerk doesnrt have a name, to follow our schema rules and to prevent db from breaking
     const firstName = user.firstName || "New";
@@ -36,8 +37,9 @@ export async function POST(req: Request) {
         lastName: lastName,
         age: ageInt,                  // this field is mandatory
         currentWeight: weightFloat,   // this field is mandatory
+        targetWeight: targetWeightFloat,
         height: heightFloat,          // this field is mandatory
-        activityLevel: body.activityLevel,
+        activityLevel: body.activityLevel || undefined,
         goal: body.goal,
         dietaryType: body.dietaryType,
         allergies: body.allergies,
@@ -46,8 +48,9 @@ export async function POST(req: Request) {
       update: {
         age: ageInt,
         currentWeight: weightFloat,
+        targetWeight: targetWeightFloat,
         height: heightFloat,
-        activityLevel: body.activityLevel,
+        activityLevel: body.activityLevel || undefined,
         goal: body.goal,
         dietaryType: body.dietaryType,
         allergies: body.allergies,
