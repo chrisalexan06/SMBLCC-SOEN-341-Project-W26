@@ -1,9 +1,7 @@
 "use client";
 
-import { 
-  ClerkProvider, 
+import {  
   SignInButton,
-  SignUpButton,
   SignedIn,
   SignedOut,
   UserButton, } from '@clerk/nextjs';
@@ -12,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Switch } from "@/app/components/ui/switch";
-import { ArrowLeft, User } from "lucide-react";
+import { ArrowLeft} from "lucide-react";
 
 export function Profile() {
   const router = useRouter();

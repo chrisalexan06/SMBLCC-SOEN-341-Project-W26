@@ -13,10 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/app/components/ui/carousel";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import {
-  Heart,
-  MessageCircle,
   MapPin,
   User,
   Settings,
@@ -26,19 +23,16 @@ import {
   Clock,
   BookOpen,
   Utensils,
-  ChefHat,
   Target,
   Sun,
   Moon,
   Sunset,
-  TrendingUp,
   Sparkles,
   Droplets,
   Bookmark,
   BookmarkCheck,
   ThumbsDown,
 } from "lucide-react";
-import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import Image from "next/image";
 import { AddRecipe } from "@/app/components/AddRecipe";
 import { RecipeDetailsDialog } from "@/app/components/RecipeDetailsDialog";
@@ -47,25 +41,10 @@ import {
   type RecipeMapFocus,
 } from "@/app/components/RestaurantMap";
 
-const calorieData = [
-  { name: "Consumed", value: 1650 },
-  { name: "Remaining", value: 350 },
-];
-
 const COLORS = {
   consumed: "#A8B5A0", // sage green
   remaining: "#E0D5EF", // lilac purple light
 };
-
-const weekDays = [
-  { day: "Mon", date: "Feb 3", meals: ["Oatmeal", "Salad Bowl", "Grilled Chicken"] },
-  { day: "Tue", date: "Feb 4", meals: ["Smoothie", "Wrap", "Pasta"] },
-  { day: "Wed", date: "Feb 5", meals: ["Eggs", "Burrito", "Salmon"] },
-  { day: "Thu", date: "Feb 6", meals: ["Yogurt", "", "Pizza"] },
-  { day: "Fri", date: "Feb 7", meals: ["", "", ""] },
-  { day: "Sat", date: "Feb 8", meals: ["", "", ""] },
-  { day: "Sun", date: "Feb 9", meals: ["", "", ""] },
-];
 
 export function Dashboard() {
   const router = useRouter();
@@ -90,8 +69,6 @@ export function Dashboard() {
 
   // Weekly progress data (mock)
   const weekProgress = [85, 72, 83, 0, 0, 0, 0]; 
-  const todayDayIndex = new Date().getDay(); 
-  const daysLogged = weekProgress.filter(v => v > 0).length;
 
   // NEW: State for the Fake FYP
   const [fypRecipes, setFypRecipes] = useState<any[]>([]);
