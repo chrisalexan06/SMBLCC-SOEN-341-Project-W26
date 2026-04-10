@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/app/components/ui/button";
-import { useClerk } from "@clerk/nextjs";
 import { Check } from "lucide-react";
 
 
