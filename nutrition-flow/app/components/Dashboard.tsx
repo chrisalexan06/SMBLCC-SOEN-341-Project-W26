@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
@@ -17,6 +18,7 @@ import { Heart, MessageCircle, MapPin, User, Settings, Calendar, Plus, Flame, Cl
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import Image from "next/image";
 import { AddRecipe } from "@/app/components/AddRecipe";
+import { RecipeDetailsDialog } from "@/app/components/RecipeDetailsDialog";
 
 const calorieData = [
   { name: "Consumed", value: 1650 },
@@ -40,7 +42,10 @@ const weekDays = [
 
 export function Dashboard() {
   const router = useRouter();
+  const { userId } = useAuth();
   const [isAddRecipeOpen, setIsAddRecipeOpen] = useState(false);
+  const [viewingRecipe, setViewingRecipe] = useState<any>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const totalCalories = 2000;
   const consumedCalories = 1650;
   const percentage = Math.round((consumedCalories / totalCalories) * 100);
@@ -64,16 +69,107 @@ export function Dashboard() {
   // NEW: State for the Fake FYP
   const [fypRecipes, setFypRecipes] = useState<any[]>([]);
 
-  // NEW: Fetch and shuffle recipes for the FYP
+  // NEW: Fetch and shuffle recipes for the FYP filtered by user's dietary restrictions and allergies
   useEffect(() => {
     const fetchAndShuffleFYP = async () => {
       try {
-        const res = await fetch("/api/recipes?all=true");
-        if (!res.ok) return;
-        const data = await res.json();
+        // Mapping of allergy categories to common ingredients
+        const allergyIngredientMap: { [key: string]: string[] } = {
+          peanuts: ["peanut", "peanuts", "peanut butter", "peanut oil"],
+          gluten: ["wheat", "barley", "rye", "gluten", "flour", "bread", "pasta", "noodle", "cereal", "bran", "crouton"],
+          shellfish: ["shrimp", "prawn", "crab", "lobster", "scallop", "clam", "mussel", "oyster", "squid", "calamari"],
+          soy: ["soy", "soya", "tofu", "edamame", "miso", "tamari", "soy sauce", "tempeh"],
+          eggs: ["egg", "eggs", "eggy"],
+          treeNuts: ["almond", "walnut", "cashew", "pecan", "pistachio", "macadamia", "brazil nut", "hazelnut", "pine nut", "almond butter", "walnut oil"],
+          wheat: ["wheat", "flour", "bread", "pasta", "noodle", "cereal", "bran", "crouton", "bulgur"],
+          fish: ["salmon", "tuna", "cod", "trout", "halibut", "anchovy", "herring", "mackerel", "tilapia", "fish sauce", "anchovies"],
+          milk: ["milk", "cheese", "butter", "cream", "yogurt", "ice cream", "whey", "casein", "lactose", "ghee", "buttermilk"],
+          sesame: ["sesame", "tahini", "sesame oil", "sesame seed"],
+        };
+
+        // Fetch user profile to get dietary restrictions and allergies
+        const profileRes = await fetch("/api/user/sync");
+        if (!profileRes.ok) {
+          console.error("Failed to fetch profile");
+          return;
+        }
+        const profileData = await profileRes.json();
         
-       // Shuffle the recipes and take the top 20 for the FYP
-        const shuffled = data.sort(() => 0.5 - Math.random());
+        // Get user's dietary types and normalize them to match recipe tags
+        // e.g., ["Pescatarian"] -> ["PESCATARIAN"]
+        const userDietaryTypes = (profileData.dietaryType || []).map((type: string) =>
+          type.toUpperCase().replace(" ", "_")
+        );
+        
+        // Get user's allergies and normalize them
+        const userAllergies = (profileData.allergies || []).map((allergy: string) =>
+          allergy.toLowerCase().replace(/\s+/g, "_")
+        );
+        
+        // Create a set of all allergen ingredients the user is allergic to
+        const allergenIngredients = new Set<string>();
+        userAllergies.forEach((allergy: string) => {
+          const ingredients = allergyIngredientMap[allergy] || [];
+          ingredients.forEach((ingredient) => {
+            allergenIngredients.add(ingredient.toLowerCase());
+          });
+        });
+        
+        // Fetch all recipes
+        const recipeRes = await fetch("/api/recipes?all=true");
+        if (!recipeRes.ok) {
+          console.error("Failed to fetch recipes");
+          return;
+        }
+        const recipes = await recipeRes.json();
+        
+        // Fetch user's own recipes to get their IDs
+        const myRecipesRes = await fetch("/api/recipes");
+        if (!myRecipesRes.ok) {
+          console.error("Failed to fetch my recipes");
+          return;
+        }
+        const myRecipes = await myRecipesRes.json();
+        const myRecipeIds = new Set(myRecipes.map((r: any) => r.id));
+        
+        // Helper function to check if recipe contains any allergens
+        const containsAllergen = (recipe: any): boolean => {
+          if (!recipe.ingredients || recipe.ingredients.length === 0) {
+            return false;
+          }
+          return recipe.ingredients.some((ingredient: any) => {
+            const ingredientNameLower = ingredient.name.toLowerCase();
+            return allergenIngredients.has(ingredientNameLower) ||
+              Array.from(allergenIngredients).some((allergen) =>
+                ingredientNameLower.includes(allergen) || allergen.includes(ingredientNameLower)
+              );
+          });
+        };
+        
+        // Filter recipes that match user's dietary restrictions
+        // Only show recipes that have at least one dietary tag matching user's profile
+        // AND exclude recipes from the current user
+        // AND exclude recipes containing allergens
+        const filteredRecipes = recipes.filter((recipe: any) => {
+          // Skip user's own recipes
+          if (myRecipeIds.has(recipe.id)) {
+            return false;
+          }
+          if (!recipe.dietaryTags || recipe.dietaryTags.length === 0) {
+            return false; // Skip recipes with no dietary tags
+          }
+          // Skip recipes containing allergens
+          if (containsAllergen(recipe)) {
+            return false;
+          }
+          // Check if recipe has at least one matching dietary tag
+          return recipe.dietaryTags.some((tag: string) =>
+            userDietaryTypes.includes(tag)
+          );
+        });
+        
+        // Shuffle the filtered recipes and take the top 20 for the FYP
+        const shuffled = filteredRecipes.sort(() => 0.5 - Math.random());
         setFypRecipes(shuffled.slice(0, 20));
       } catch (error) {
         console.error("Failed to load FYP:", error);
@@ -365,6 +461,10 @@ export function Dashboard() {
                         <Card 
                             key={recipe.id} 
                             className="overflow-hidden rounded-3xl border border-gray-100 shadow-sm bg-white group cursor-pointer flex flex-col h-full"
+                            onClick={() => {
+                              setViewingRecipe(recipe);
+                              setIsViewDialogOpen(true);
+                            }}
                           >
                             {/* Image Area */}
                             <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden flex items-center justify-center">
@@ -394,7 +494,7 @@ export function Dashboard() {
                                 </div>
 
                                 <div className="flex flex-wrap gap-1">
-                                    {recipe.dietaryTags?.slice(0, 3).map((tag: string) => (
+                                    {recipe.dietaryTags?.map((tag: string) => (
                                       <span key={tag} className="text-[11px] text-gray-400">
                                         #{tag.replace('_', '')}
                                       </span>
@@ -477,6 +577,12 @@ export function Dashboard() {
           <AddRecipe />
         </DialogContent>
       </Dialog>
+
+      <RecipeDetailsDialog 
+        isOpen={isViewDialogOpen} 
+        onOpenChange={setIsViewDialogOpen} 
+        recipe={viewingRecipe} 
+      />
     </div>
   );
 }
