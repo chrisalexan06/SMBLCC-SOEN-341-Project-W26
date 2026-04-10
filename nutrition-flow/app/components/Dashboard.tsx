@@ -656,6 +656,7 @@ const handleHideRecipe = async (
                             
                           >
                             <button
+  data-testid="save-button"
   type="button"
   onClick={(e) => handleToggleSaveRecipe(recipe.id, e)}
   disabled={savingRecipeIds.has(recipe.id)}
