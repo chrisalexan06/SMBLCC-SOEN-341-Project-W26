@@ -42,6 +42,10 @@ import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import Image from "next/image";
 import { AddRecipe } from "@/app/components/AddRecipe";
 import { RecipeDetailsDialog } from "@/app/components/RecipeDetailsDialog";
+import {
+  NearbyRestaurantsMap,
+  type RecipeMapFocus,
+} from "@/app/components/RestaurantMap";
 
 const calorieData = [
   { name: "Consumed", value: 1650 },
@@ -95,6 +99,9 @@ export function Dashboard() {
   const [savingRecipeIds, setSavingRecipeIds] = useState<Set<string>>(new Set());
   const [hiddenRecipeIds, setHiddenRecipeIds] = useState<Set<string>>(new Set());
   const [hidingRecipeIds, setHidingRecipeIds] = useState<Set<string>>(new Set());
+  const [mapRecipeFocus, setMapRecipeFocus] = useState<RecipeMapFocus | null>(
+    null
+  );
 
   // NEW: Fetch and shuffle recipes for the FYP filtered by user's dietary restrictions and allergies
   useEffect(() => {
@@ -675,17 +682,36 @@ const handleHideRecipe = async (
                               />
                             </div>
 
-                            <div className="px-4 pt-3">
-  <Button
-    variant="outline"
-    className="w-full rounded-xl"
-    onClick={(e) => handleHideRecipe(recipe.id, e)}
-    disabled={hidingRecipeIds.has(recipe.id)}
-  >
-    <ThumbsDown className="w-4 h-4 mr-2" />
-    Not Interested
-  </Button>
-</div>
+                            <div className="px-4 pt-3 flex flex-col gap-2">
+                              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                <Button
+                                  variant="outline"
+                                  className="w-full rounded-xl"
+                                  onClick={(e) => handleHideRecipe(recipe.id, e)}
+                                  disabled={hidingRecipeIds.has(recipe.id)}
+                                >
+                                  <ThumbsDown className="w-4 h-4 mr-2" />
+                                  Not Interested
+                                </Button>
+                                <Button
+                                  type="button"
+                                  className="w-full rounded-xl text-white border-0 shadow-sm"
+                                  style={{
+                                    backgroundColor: "var(--sage-green-dark)",
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setMapRecipeFocus({
+                                      name: recipe.name,
+                                      dietaryTags: recipe.dietaryTags ?? [],
+                                    });
+                                  }}
+                                >
+                                  <MapPin className="w-4 h-4 mr-2" />
+                                  Find nearby
+                                </Button>
+                              </div>
+                            </div>
                             
                             {/* Content Below Image */}
                             <div className="px-3 py-2 flex flex-col gap-1">
@@ -735,47 +761,22 @@ const handleHideRecipe = async (
           </div>
 
           {/* Right Column - Map */}
-          <div className="lg:col-span-3 flex">
-            <Card className="p-3 rounded-2xl flex-1 flex flex-col">
-              <div className="mb-3 text-center">
-                <h3 className="text-lg font-semibold mb-0.5">Nearby Places</h3>
-                <p className="text-xs text-muted-foreground">Restaurants around you</p>
+          <div className="lg:col-span-3 flex min-h-0">
+            <Card className="p-3 rounded-2xl flex-1 flex flex-col gap-2 border-gray-100 shadow-sm">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-0.5 text-gray-800">
+                  Nearby Places
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Restaurants matched to your diet — tap{" "}
+                  <span className="font-medium text-gray-700">Find nearby</span>{" "}
+                  on a For You card to search by that recipe.
+                </p>
               </div>
-              <div
-                className="w-full flex-1 rounded-xl flex items-center justify-center min-h-0"
-                style={{ backgroundColor: "var(--sage-green-light)" }}
-              >
-                <div className="text-center">
-                  <MapPin className="w-8 h-8 mx-auto mb-1" style={{ color: "var(--sage-green-dark)" }} />
-                  <p className="text-xs text-muted-foreground">Map view</p>
-                </div>
-              </div>
-              <div className="mt-2 space-y-0.5">
-                <div className="p-1.5 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <div className="flex justify-between items-start mb-0.5">
-                    <div className="text-xs">Campus Cafe</div>
-                    <div
-                      className="px-2 py-0.5 rounded text-xs"
-                      style={{ backgroundColor: "var(--sage-green-light)" }}
-                    >
-                      0.3 mi
-                    </div>
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">Healthy bowls, salads</div>
-                </div>
-                <div className="p-1.5 rounded-lg hover:bg-gray-50 cursor-pointer">
-                  <div className="flex justify-between items-start mb-0.5">
-                    <div className="text-xs">Pizza Palace</div>
-                    <div
-                      className="px-2 py-0.5 rounded text-xs"
-                      style={{ backgroundColor: "var(--sage-green-light)" }}
-                    >
-                      0.5 mi
-                    </div>
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">Italian, Pizza</div>
-                </div>
-              </div>
+              <NearbyRestaurantsMap
+                recipeFocus={mapRecipeFocus}
+                onClearRecipeFocus={() => setMapRecipeFocus(null)}
+              />
             </Card>
           </div>
         </div>
