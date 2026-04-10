@@ -17,7 +17,7 @@ export async function signIn(page: Page) {
 
   await page.locator('button[type="submit"]').click({ force: true })
 
-  await page.waitForURL('/dashboard', { timeout: 50000 }).catch(async () => {
+  await page.waitForURL('/dashboard', { timeout: 10000 }).catch(async () => {
     console.log('Final URL:', page.url())
     
   })
