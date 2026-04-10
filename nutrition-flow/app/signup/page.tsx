@@ -16,7 +16,6 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
-  const { signOut } = useClerk();
 
 
   const handleSignup = async (e: React.FormEvent) => {
