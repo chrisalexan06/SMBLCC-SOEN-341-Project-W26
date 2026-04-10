@@ -36,6 +36,7 @@ import {
   Droplets,
   Bookmark,
   BookmarkCheck,
+  ThumbsDown,
 } from "lucide-react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import Image from "next/image";
@@ -92,6 +93,8 @@ export function Dashboard() {
   const [fypRecipes, setFypRecipes] = useState<any[]>([]);
   const [savedRecipeIds, setSavedRecipeIds] = useState<Set<string>>(new Set());
   const [savingRecipeIds, setSavingRecipeIds] = useState<Set<string>>(new Set());
+  const [hiddenRecipeIds, setHiddenRecipeIds] = useState<Set<string>>(new Set());
+  const [hidingRecipeIds, setHidingRecipeIds] = useState<Set<string>>(new Set());
 
   // NEW: Fetch and shuffle recipes for the FYP filtered by user's dietary restrictions and allergies
   useEffect(() => {
@@ -176,6 +179,9 @@ export function Dashboard() {
         // AND exclude recipes from the current user
         // AND exclude recipes containing allergens
         const filteredRecipes = recipes.filter((recipe: any) => {
+          if (hiddenRecipeIds.has(recipe.id)) {
+            return false;
+          }
           // Skip user's own recipes
           if (myRecipeIds.has(recipe.id)) {
             return false;
@@ -202,7 +208,7 @@ export function Dashboard() {
     };
 
     fetchAndShuffleFYP();
-  }, []);
+  }, [hiddenRecipeIds]);
 
   useEffect(() => {
   const fetchSavedRecipes = async () => {
@@ -225,6 +231,29 @@ export function Dashboard() {
   };
 
   fetchSavedRecipes();
+}, []);
+
+useEffect(() => {
+  const fetchHiddenRecipes = async () => {
+    try {
+      const response = await fetch("/api/hidden-recipes");
+
+      if (!response.ok) {
+        return;
+      }
+
+      const hiddenRecipes = await response.json();
+      const ids = new Set<string>(
+        hiddenRecipes.map((item: any) => item.recipeId)
+      );
+
+      setHiddenRecipeIds(ids);
+    } catch (error) {
+      console.error("Failed to load hidden recipes:", error);
+    }
+  };
+
+  fetchHiddenRecipes();
 }, []);
 
 const handleToggleSaveRecipe = async (
@@ -272,6 +301,48 @@ const handleToggleSaveRecipe = async (
   }
 };
 
+const handleHideRecipe = async (
+  recipeId: string,
+  e: React.MouseEvent
+) => {
+  e.stopPropagation();
+
+  if (hidingRecipeIds.has(recipeId)) return;
+
+  setHidingRecipeIds((prev) => new Set(prev).add(recipeId));
+
+  try {
+    const response = await fetch("/api/hidden-recipes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ recipeId }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to hide recipe");
+    }
+
+    setHiddenRecipeIds((prev) => {
+      const updated = new Set(prev);
+      updated.add(recipeId);
+      return updated;
+    });
+
+    setFypRecipes((prev: any[]) =>
+      prev.filter((recipe) => recipe.id !== recipeId)
+    );
+  } catch (error) {
+    console.error("Failed to hide recipe:", error);
+  } finally {
+    setHidingRecipeIds((prev) => {
+      const updated = new Set(prev);
+      updated.delete(recipeId);
+      return updated;
+    });
+  }
+};
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -593,6 +664,8 @@ const handleToggleSaveRecipe = async (
     <Bookmark className="w-4 h-4 text-gray-700" />
   )}
 </button>
+
+
                             {/* Image Area */}
                             <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden flex items-center justify-center">
                               <img 
@@ -601,6 +674,18 @@ const handleToggleSaveRecipe = async (
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                               />
                             </div>
+
+                            <div className="px-4 pt-3">
+  <Button
+    variant="outline"
+    className="w-full rounded-xl"
+    onClick={(e) => handleHideRecipe(recipe.id, e)}
+    disabled={hidingRecipeIds.has(recipe.id)}
+  >
+    <ThumbsDown className="w-4 h-4 mr-2" />
+    Not Interested
+  </Button>
+</div>
                             
                             {/* Content Below Image */}
                             <div className="px-3 py-2 flex flex-col gap-1">
