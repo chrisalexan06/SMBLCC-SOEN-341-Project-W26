@@ -80,10 +80,11 @@ export function Dashboard() {
           shellfish: ["shrimp", "prawn", "crab", "lobster", "scallop", "clam", "mussel", "oyster", "squid", "calamari"],
           soy: ["soy", "soya", "tofu", "edamame", "miso", "tamari", "soy sauce", "tempeh"],
           eggs: ["egg", "eggs", "eggy"],
-          treeNuts: ["almond", "walnut", "cashew", "pecan", "pistachio", "macadamia", "brazil nut", "hazelnut", "pine nut", "almond butter", "walnut oil"],
+          tree_nuts: ["almond", "walnut", "cashew", "pecan", "pistachio", "macadamia", "brazil nut", "hazelnut", "pine nut", "almond butter", "walnut oil"],
           wheat: ["wheat", "flour", "bread", "pasta", "noodle", "cereal", "bran", "crouton", "bulgur"],
           fish: ["salmon", "tuna", "cod", "trout", "halibut", "anchovy", "herring", "mackerel", "tilapia", "fish sauce", "anchovies"],
           milk: ["milk", "cheese", "butter", "cream", "yogurt", "ice cream", "whey", "casein", "lactose", "ghee", "buttermilk"],
+          dairy: ["milk", "cheese", "butter", "cream", "yogurt", "ice cream", "whey", "casein", "lactose", "ghee", "buttermilk"],
           sesame: ["sesame", "tahini", "sesame oil", "sesame seed"],
         };
 
@@ -98,7 +99,7 @@ export function Dashboard() {
         // Get user's dietary types and normalize them to match recipe tags
         // e.g., ["Pescatarian"] -> ["PESCATARIAN"]
         const userDietaryTypes = (profileData.dietaryType || []).map((type: string) =>
-          type.toUpperCase().replace(" ", "_")
+          type.toUpperCase().replace(/\s+/g, "_")
         );
         
         // Get user's allergies and normalize them
