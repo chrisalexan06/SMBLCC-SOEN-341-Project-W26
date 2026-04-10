@@ -17,12 +17,6 @@ test.describe('Authentication', () => {
     await signOut(page)
     await expect(page).toHaveURL('/')
   })
-
-//might delete this test since the middleware should handle redirecting unauthenticated users, but it doesn't hurt to have an extra check
-//  test('unauthenticated user is redirected', async ({ page }) => {
- //   await page.goto('/dashboard')
-//    await expect(page).toHaveURL(/\/login/)
-//  })
 })
 
 test.describe('Weekly Planner Functions', () => {
@@ -125,7 +119,41 @@ test.describe('Unique Features', () => {
     await expect(page.getByText("No saved recipes yet")).not.toBeVisible({ timeout: 10000 })
 
   })
+})
+
+  test.describe('For You Feed', () => {
+    test('not interested hides the recipe', async ({ page }) => {
+    await signIn(page)
+
+    // Get the name of the first visible recipe
+    const recipeName = await page.locator('.carousel-item, [role="group"]')
+      .first()
+      .locator('p.font-bold, p.text-sm')
+      .first()
+      .innerText()
+
+    await page.getByText('Not Interested').first().click({ force: true })
+
+    // Recipe should no longer appear in the feed
+    await expect(page.getByText(recipeName)).not.toBeVisible({ timeout: 10000 })
+    })
+
+    test('find nearby searches for the recipe on the map', async ({ page }) => {
+    await signIn(page)
+
+    // Get the name of the first visible recipe
+    const recipeName = await page.locator('[role="group"]')
+      .first()
+      .locator('p')
+      .first()
+      .innerText()
+
+    await page.getByText('Find nearby').first().click({ force: true })
+    await page.screenshot({ path: 'e2e/debug-150-map.png' })
+    // The map search label should update to reflect the recipe name
+    await expect(page.getByText("SEARCHING FROM RECIPE")).toBeVisible({ timeout: 10000 })
   })
+})
 
   test.describe('User Profile', () => {
     test('user can update profile information', async ({ page }) => {
