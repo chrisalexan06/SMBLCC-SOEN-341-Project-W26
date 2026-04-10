@@ -7,32 +7,6 @@ import { DayPicker } from "react-day-picker";
 import { cn } from "./utils";
 import { buttonVariants } from "./button";
 
-function CustomNavigation(props: any) {
-  return (
-    <nav className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={() => props.onMonthChange(props.previousMonth)}
-        disabled={!props.previousMonth}
-        className="size-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1"
-        aria-label="Go to previous month"
-      >
-        <ChevronLeft className="size-4" />
-      </button>
-      <span className="text-sm font-medium">{props.label}</span>
-      <button
-        type="button"
-        onClick={() => props.onMonthChange(props.nextMonth)}
-        disabled={!props.nextMonth}
-        className="size-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1"
-        aria-label="Go to next month"
-      >
-        <ChevronRight className="size-4" />
-      </button>
-    </nav>
-  );
-}
-
 function Calendar({
   className,
   classNames,
