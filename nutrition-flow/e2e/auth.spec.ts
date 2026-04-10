@@ -126,3 +126,16 @@ test.describe('Unique Features', () => {
 
   })
   })
+
+  test.describe('User Profile', () => {
+    test('user can update profile information', async ({ page }) => {
+      await signIn(page)
+      await page.goto('/profile')
+      await page.waitForURL('/profile')
+      await page.getByTestId('age-input').click()
+      await page.keyboard.type('30', { delay: 50 })
+
+      await page.getByText('Save Changes').click()
+      await expect(page.getByText('Settings saved successfully!')).toBeVisible({ timeout: 10000 })
+    })
+  })
