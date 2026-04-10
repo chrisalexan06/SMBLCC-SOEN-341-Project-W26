@@ -45,9 +45,38 @@ test.describe('Weekly Planner Functions', () => {
     await page.getByTestId(`meal-slot-${dateKey}-1`).click({ force: true })
 
     await page.getByText(recipeName).click({ force: true })
-    await page.screenshot({ path: 'e2e/debug-1-after-submit.png' })
 
     await deleteRecipe(page, recipeName)
+  })
+
+  test('user cannot add duplicate recipe to weekly planner', async ({ page }) => {
+    await signIn(page)
+    await addInfoNoName(page)
+
+    //input name
+    const recipeName = 'Cheese Balls ' + Date.now()
+    await page.getByPlaceholder('e.g., Quinoa Buddha Bowl').click()
+    await page.keyboard.type(recipeName, { delay: 50 })
+    
+    await page.getByTestId("save-recipe-button").click({ force: true })
+    await expect(page.getByText('Recipe saved')).toBeVisible({ timeout: 10000 })
+
+    await page.goto('/planning') 
+    await page.waitForURL('/planning')
+
+    const dateKey = format(new Date(), "yyyy-MM-dd");
+    await page.getByTestId(`meal-slot-${dateKey}-1`).click({ force: true })
+
+    const dialog = page.getByRole('dialog', { name: 'Select Recipe' });
+
+    await dialog.getByText(recipeName).click({ force: true })
+    await page.waitForTimeout(500)
+    await page.keyboard.press('Escape')
+
+    await page.getByTestId(`meal-slot-${dateKey}-2`).click({ force: true })
+    await dialog.getByText(recipeName).click();
+    await page.screenshot({ path: 'e2e/debug-140-duplicate.png' })
+    await expect(dialog.getByText('You already added this recipe.')).toBeVisible({ timeout: 10000 })
   })
 })
 

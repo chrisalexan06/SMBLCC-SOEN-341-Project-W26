@@ -488,6 +488,7 @@ export function WeeklyPlanner() {
         {/* Save Week Button */}
         <div className="flex justify-end mt-8">
           <Button
+            data-testid="save-week-button"
             onClick={handleSaveWeek}
             disabled={saveStatus === 'saving'}
             className="px-8 py-3 text-lg font-bold rounded-2xl shadow-md bg-gradient-to-r from-brand-sage to-brand-lilac"
