@@ -13,6 +13,25 @@ env:
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY }}
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --prefix nutrition-flow
+
+      - name: Run ESLint
+        working-directory: nutrition-flow
+        run: npx eslint app
+    
   e2e:
     runs-on: ubuntu-latest
 

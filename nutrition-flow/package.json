@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
+    "lint": "eslint app",
     "run": "ts-node --prefix nutrition-flow run test"
   },
   "dependencies": {
@@ -39,6 +39,7 @@
     "vaul": "1.1.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.58.2",
     "@prisma/client": "5.19",

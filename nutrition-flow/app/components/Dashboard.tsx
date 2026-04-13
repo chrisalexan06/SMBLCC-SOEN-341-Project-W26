@@ -653,7 +653,7 @@ const handleHideRecipe = async (
 
                             {/* Image Area */}
                             <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden flex items-center justify-center">
-                              <img 
+                              <Image 
                                 src={recipe.imageUrl || "/images/meals.webp"} 
                                 alt={recipe.name}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -753,7 +753,7 @@ const handleHideRecipe = async (
               </div>
               <NearbyRestaurantsMap
                 recipeFocus={mapRecipeFocus}
-                onClearRecipeFocus={() => setMapRecipeFocus(null)}
+                onClearRecipeFocusAction={() => setMapRecipeFocus(null)}
               />
             </Card>
           </div>

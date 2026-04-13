@@ -181,12 +181,12 @@ function CameraMover({ intent }: { intent: CameraIntent | null }) {
 
 type NearbyRestaurantsMapProps = {
   recipeFocus: RecipeMapFocus | null;
-  onClearRecipeFocus?: () => void;
+  onClearRecipeFocusAction?: () => void;
 };
 
 export function NearbyRestaurantsMap({
   recipeFocus,
-  onClearRecipeFocus,
+  onClearRecipeFocusAction,
 }: NearbyRestaurantsMapProps) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
 
@@ -307,13 +307,13 @@ export function NearbyRestaurantsMap({
               {recipeFocus.name}
             </p>
           </div>
-          {onClearRecipeFocus && (
+          {onClearRecipeFocusAction && (
             <Button
               type="button"
               variant="ghost"
               size="icon"
               className="h-8 w-8 shrink-0 rounded-full"
-              onClick={onClearRecipeFocus}
+              onClick={onClearRecipeFocusAction}
               aria-label="Clear recipe search"
             >
               <X className="h-4 w-4" />

@@ -141,15 +141,7 @@ test.describe('Unique Features', () => {
     test('find nearby searches for the recipe on the map', async ({ page }) => {
     await signIn(page)
 
-    // Get the name of the first visible recipe
-    const recipeName = await page.locator('[role="group"]')
-      .first()
-      .locator('p')
-      .first()
-      .innerText()
-
     await page.getByText('Find nearby').first().click({ force: true })
-    await page.screenshot({ path: 'e2e/debug-150-map.png' })
     // The map search label should update to reflect the recipe name
     await expect(page.getByText("SEARCHING FROM RECIPE")).toBeVisible({ timeout: 10000 })
   })

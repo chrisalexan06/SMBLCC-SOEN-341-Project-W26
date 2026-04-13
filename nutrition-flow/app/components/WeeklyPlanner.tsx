@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import Image from "next/image";
 import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
@@ -525,7 +526,7 @@ export function WeeklyPlanner() {
                   >
                   
                   <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden shrink-0">
-                    <img src={recipe.imageUrl || "/images/meals.webp"} alt={recipe.name} className="w-full h-full object-cover" />
+                    <Image src={recipe.imageUrl || "/images/meals.webp"} alt={recipe.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-gray-800 leading-tight">{recipe.name}</p>
