@@ -41,20 +41,16 @@ NutriFlow is a web application designed to help students plan meals, manage reci
 
 ## Future Enhancements
 ### Social Features
-- Add friends and build a community
 - View friends' meal plans and recipes
-- Share streaks and status updates
 - Post and share meals in a social feed
 
 ### Health & Fitness Tools
 - Calorie calculator in user profile
 - Per-meal and daily calorie tracking
 - Weight goals and maintenance calorie recommendations
-- Streak tracking for consistency motivation
 
 ### Location Services
 - Google Maps integration
-- Find nearby gyms and fitness centers
 - Locate grocery stores and health food shops
 Restaurant recommendations with nutritional info
 
