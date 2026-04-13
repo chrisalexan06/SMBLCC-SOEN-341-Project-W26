@@ -100,7 +100,7 @@ export function Profile() {
       }
     }
     loadProfile();
-  }, []);
+  });
 
   // Conversion helpers for height and weight unit switching.
   const convertKgToLbs = (kg: number) => Math.round((kg * 2.20462) * 10) / 10;

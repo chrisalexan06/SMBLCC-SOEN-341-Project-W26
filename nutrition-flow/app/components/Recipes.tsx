@@ -7,12 +7,11 @@ import { Button } from "@/app/components/ui/button";
 import { Badge } from "@/app/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { Input } from "@/app/components/ui/input";
-import { Textarea } from "@/app/components/ui/textarea";
 import { Slider } from "@/app/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
 import { Checkbox } from "@/app/components/ui/checkbox";
 import { ArrowLeft, ChefHat, Clock, Flame, Pencil, Search, Utensils, ListChecks, Trash2, Plus, DollarSign, X, ImageIcon, FileText, ListOrdered, Tag } from "lucide-react"; // Cute icons from lucide
 import { toast } from "sonner";
+import Image from "next/image";
 
 export function Recipes({ recipes }: { recipes: any[] }) {
   const router = useRouter();
@@ -415,7 +414,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                 {/* Recipe Image */}
                 <div className="relative h-48 w-full bg-gray-100">
                   {recipe.imageUrl ? (
-                    <img src={recipe.imageUrl} alt={recipe.name} className="w-full h-full object-cover" />
+                    <Image src={recipe.imageUrl} alt={recipe.name} className="w-full h-full object-cover" width={400} height={225} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300"><ChefHat className="w-12 h-12 opacity-20" /></div>
                   )}
@@ -470,7 +469,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
                 <DialogTitle className="text-2xl font-bold text-sage-800">{viewingRecipe.name}</DialogTitle>
               </DialogHeader>
 
-              {viewingRecipe.imageUrl && <img src={viewingRecipe.imageUrl} className="w-full h-64 object-cover rounded-xl" alt="" />}
+              {viewingRecipe.imageUrl && <Image src={viewingRecipe.imageUrl} className="w-full h-64 object-cover rounded-xl" alt="" />}
               
               <p className="text-gray-600 italic border-l-4 border-sage-200 pl-4">{viewingRecipe.description || "No description provided."}</p>
 

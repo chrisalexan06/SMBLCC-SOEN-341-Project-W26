@@ -6,6 +6,7 @@ import { Card } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
 import { ArrowLeft, BookmarkX, Clock, Flame } from "lucide-react";
 import { RecipeDetailsDialog } from "@/app/components/RecipeDetailsDialog";
+import Image from "next/image";
 
 export function SavedRecipes({ savedRecipes }: { savedRecipes: any[] }) {
   const router = useRouter();
@@ -79,10 +80,12 @@ export function SavedRecipes({ savedRecipes }: { savedRecipes: any[] }) {
                   }}
                 >
                   <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden">
-                    <img
+                    <Image
                       src={recipe.imageUrl || "/images/meals.webp"}
                       alt={recipe.name}
                       className="w-full h-full object-cover"
+                      width={400}
+                      height={225}
                     />
                   </div>
 

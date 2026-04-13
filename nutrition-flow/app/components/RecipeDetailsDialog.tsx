@@ -3,6 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { Badge } from "@/app/components/ui/badge";
 import { Clock, Flame, DollarSign, Tag, Utensils, ListChecks } from "lucide-react";
+import Image from "next/image";
 
 interface RecipeDetailsdialogProps {
   isOpen: boolean;
@@ -21,7 +22,7 @@ export function RecipeDetailsDialog({ isOpen, onOpenChange, recipe }: RecipeDeta
             <DialogTitle className="text-2xl font-bold text-sage-800">{recipe.name}</DialogTitle>
           </DialogHeader>
 
-          {recipe.imageUrl && <img src={recipe.imageUrl} className="w-full h-64 object-cover rounded-xl" alt="" />}
+          {recipe.imageUrl && <Image src={recipe.imageUrl} className="w-full h-64 object-cover rounded-xl" alt="" />}
           
           <p className="text-gray-600 italic border-l-4 border-sage-200 pl-4">{recipe.description || "No description provided."}</p>
 
