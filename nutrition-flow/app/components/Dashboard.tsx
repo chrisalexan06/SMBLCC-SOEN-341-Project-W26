@@ -66,7 +66,7 @@ export function Dashboard() {
   const greeting = getGreeting();
   const GreetingIcon = greeting.icon;
 
-  // Weekly progress data (mock)
+  // Weekly progress data (mock)  
   const weekProgress = [85, 72, 83, 0, 0, 0, 0]; 
 
   // NEW: State for the Fake FYP
