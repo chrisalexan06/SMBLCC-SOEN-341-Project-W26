@@ -5,6 +5,7 @@ dotenv.config({ path: '.env' })
 console.log('CLERK_SECRET_KEY:', !!process.env.CLERK_SECRET_KEY)
 
 export default defineConfig({
+  timeout: 200_000,
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

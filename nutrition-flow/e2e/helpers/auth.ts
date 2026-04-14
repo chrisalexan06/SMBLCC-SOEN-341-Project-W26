@@ -17,7 +17,7 @@ export async function signIn(page: Page) {
 
   await page.locator('button[type="submit"]').click({ force: true })
 
-  await page.waitForURL('/dashboard', { timeout: 15000 })
+  await page.waitForURL('/dashboard')
 }
 
 //fix so that it directs to profile page and then click the user button to sign out, since the user button is not visible on the dashboard page
@@ -80,13 +80,13 @@ export async function deleteRecipe(page: Page, recipeName: string) {
   await expect(page.getByTestId(`select-recipe-${recipeName}`)).toBeChecked()
   //await page.screenshot({ path: 'e2e/debug-1-after-submit.png' })
   
-  await expect(page.getByText('1 selected')).toBeVisible({ timeout: 8000 })
+  await expect(page.getByText('1 selected')).toBeVisible({timeout: 2000})
   
   await page.evaluate(() => {
   window.confirm = () => true
   })
   
   await page.getByTestId('delete-selected-button').click({ force: true })
-  await expect(page.getByText(recipeName)).not.toBeVisible({ timeout: 15000 })
+  await expect(page.getByText(recipeName)).not.toBeVisible({timeout: 10000})
 
 }
