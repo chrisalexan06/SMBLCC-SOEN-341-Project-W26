@@ -238,7 +238,7 @@ export function Profile() {
               </SignedOut>
                 {/* Show the user button when the user is signed in */}
                 <SignedIn>
-                  <UserButton />
+                  <UserButton data-testid="userimg-button"/>
                 </SignedIn>
             </div>
         </div>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/app/lib/prisma";
 
+console.log('CLERK_SECRET_KEY present:', !!process.env.CLERK_SECRET_KEY)
 // GET function to retrieve user data for the Profile page
 export async function GET() {
   try {

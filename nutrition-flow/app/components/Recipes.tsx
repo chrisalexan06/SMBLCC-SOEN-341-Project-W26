@@ -537,7 +537,7 @@ export function Recipes({ recipes }: { recipes: any[] }) {
               {/* Recipe Name */}
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-1.5 block">Recipe Name</label>
-                <Input value={formData.recipeName} onChange={(e) => handleInputChange("recipeName", e.target.value)} placeholder="e.g., Quinoa Buddha Bowl" className="rounded-xl border-gray-200 focus:border-sage-500 h-11" />
+                <Input data-testid="edit-recipe-name" value={formData.recipeName} onChange={(e) => handleInputChange("recipeName", e.target.value)} placeholder="e.g., Quinoa Buddha Bowl" className="rounded-xl border-gray-200 focus:border-sage-500 h-11" />
               </div>
 
               {/* Description */}

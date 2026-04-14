@@ -14,6 +14,7 @@ test.describe('Authentication', () => {
 
   test('user can sign out', async ({ page }) => {
     await signIn(page)
+    await expect(page).toHaveURL('/dashboard')
     await signOut(page)
     await expect(page).toHaveURL('/')
   })
@@ -23,14 +24,14 @@ test.describe('Weekly Planner Functions', () => {
   test('user can add recipe to weekly planner', async ({ page }) => {
     await signIn(page)
     await addInfoNoName(page)
-
     //input name
     const recipeName = 'Cheese Balls ' + Date.now()
-    await page.getByPlaceholder('e.g., Quinoa Buddha Bowl').click()
+    
+    await page.getByTestId('edit-recipe-name').click()
     await page.keyboard.type(recipeName, { delay: 50 })
     
     await page.getByTestId("save-recipe-button").click({ force: true })
-    await expect(page.getByText('Recipe saved')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Recipe saved')).toBeVisible({ timeout: 1000 })
 
     await page.goto('/planning') 
     await page.waitForURL('/planning')
@@ -48,12 +49,12 @@ test.describe('Weekly Planner Functions', () => {
     await addInfoNoName(page)
 
     //input name
-    const recipeName = 'Cheese Balls ' + Date.now()
+    const recipeName = 'E ' + Date.now()
     await page.getByPlaceholder('e.g., Quinoa Buddha Bowl').click()
-    await page.keyboard.type(recipeName, { delay: 50 })
+    await page.keyboard.type(recipeName, { delay: 25 })
     
     await page.getByTestId("save-recipe-button").click({ force: true })
-    await expect(page.getByText('Recipe saved')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Recipe saved')).toBeVisible({ timeout: 7000 })
 
     await page.goto('/planning') 
     await page.waitForURL('/planning')
@@ -69,8 +70,7 @@ test.describe('Weekly Planner Functions', () => {
 
     await page.getByTestId(`meal-slot-${dateKey}-2`).click({ force: true })
     await dialog.getByText(recipeName).click();
-    await page.screenshot({ path: 'e2e/debug-140-duplicate.png' })
-    await expect(dialog.getByText('You already added this recipe.')).toBeVisible({ timeout: 10000 })
+    await expect(dialog.getByText('You already added this recipe.')).toBeVisible({ timeout: 1000 })
   })
 })
 
@@ -85,8 +85,6 @@ test.describe('Recipe Functions', () => {
     await page.getByTestId("save-recipe-button").click({ force: true })
     await expect(page.getByText('Please enter a recipe name')).not.toBeVisible({ timeout: 1500 })
     
-    await page.goto('/recipes') 
-    
   })
 
   test('user can create and delete recipe', async ({ page }) => {
@@ -95,11 +93,10 @@ test.describe('Recipe Functions', () => {
 
     //input name
     const recipeName = 'Test Recipe ' + Date.now()
-    await page.getByPlaceholder('e.g., Quinoa Buddha Bowl').click()
-    await page.keyboard.type(recipeName, { delay: 50 })
+    await page.getByPlaceholder('e.g., Quinoa Buddha Bowl').fill(recipeName)
     
     await page.getByTestId("save-recipe-button").click({ force: true })
-    await expect(page.getByText('Recipe saved')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('Recipe saved')).toBeVisible({ timeout: 1000 })
     
     await deleteRecipe(page, recipeName)
     // await page.screenshot({ path: 'e2e/debug-3-after-submit.png' })
@@ -116,7 +113,7 @@ test.describe('Unique Features', () => {
     await page.getByText("Review Saved").click({ force: true })
     await page.waitForTimeout(500)
 
-    await expect(page.getByText("No saved recipes yet")).not.toBeVisible({ timeout: 10000 })
+    await expect(page.getByText("No saved recipes yet")).not.toBeVisible({ timeout: 1000 })
 
   })
 })
@@ -135,7 +132,7 @@ test.describe('Unique Features', () => {
     await page.getByText('Not Interested').first().click({ force: true })
 
     // Recipe should no longer appear in the feed
-    await expect(page.getByText(recipeName)).not.toBeVisible({ timeout: 10000 })
+    await expect(page.getByText(recipeName)).not.toBeVisible({ timeout: 1000 })
     })
 
     test('find nearby searches for the recipe on the map', async ({ page }) => {
@@ -143,7 +140,7 @@ test.describe('Unique Features', () => {
 
     await page.getByText('Find nearby').first().click({ force: true })
     // The map search label should update to reflect the recipe name
-    await expect(page.getByText("SEARCHING FROM RECIPE")).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText("SEARCHING FROM RECIPE")).toBeVisible({ timeout: 7000 })
   })
 })
 
@@ -155,6 +152,6 @@ test.describe('Unique Features', () => {
       await page.getByTestId('age-input').fill('30')
 
       await page.getByText('Save Changes').click()
-      await expect(page.getByText('Settings saved successfully!')).toBeVisible({ timeout: 10000 })
+      await expect(page.getByText('Settings saved successfully!')).toBeVisible({ timeout: 6000 })
     })
   })

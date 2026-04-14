@@ -33,7 +33,6 @@ import {
   BookmarkCheck,
   ThumbsDown,
 } from "lucide-react";
-import Image from "next/image";
 import { AddRecipe } from "@/app/components/AddRecipe";
 import { RecipeDetailsDialog } from "@/app/components/RecipeDetailsDialog";
 import {
@@ -332,12 +331,11 @@ const handleHideRecipe = async (
       {/* Header */}
       <header className="bg-white border-b px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-           <Image
+           <img
             src="/images/logo1.png"
             alt="NutriFlow Logo"
             width={225}
             height={125}
-            priority
           />
           <div className="flex items-center gap-4">
             <Button
@@ -653,7 +651,7 @@ const handleHideRecipe = async (
 
                             {/* Image Area */}
                             <div className="relative w-full aspect-[16/9] bg-gray-50 overflow-hidden flex items-center justify-center">
-                              <Image 
+                              <img
                                 src={recipe.imageUrl || "/images/meals.webp"} 
                                 alt={recipe.name}
                                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
