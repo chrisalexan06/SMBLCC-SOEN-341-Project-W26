@@ -58,3 +58,11 @@ Restaurant recommendations with nutritional info
 - Google API for enhanced location services
 - Potential Strava-like features for sharing fitness achievements
 - Social feed powered by modern database architecture
+
+## GitHub ID
+-Christina Alexandrakis (chrisalexan06)
+-Lea Saad (leaSaad)
+-Bianca Ignat (biancaignatt)
+-Sarah Tannous (sarahtannous)
+-Mohamed Salah (momo-s15)
+-Celina Younes (celina-younes)
