@@ -3,9 +3,9 @@
 import { useSignIn } from "@clerk/nextjs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { Button } from "@/app/components/ui/button";
 import { Check } from "lucide-react";
+import Image from "next/image";
 
 export function Login() {
   const { signIn, setActive } = useSignIn();
@@ -72,12 +72,11 @@ export function Login() {
         />
         <div className="absolute inset-0 bg-white/90 z-10" />
         <div className="relative z-20 max-w-md">
-          <Image
+          <img
             src="/images/logo1.png"
             alt="Nutrition Flow Logo"
             width={405}
             height={405}
-            priority
           />
           <div className="mt-12 space-y-4">
             <div className="flex items-center gap-3">
