@@ -31,6 +31,7 @@ test.describe('Weekly Planner Functions', () => {
     await page.keyboard.type(recipeName, { delay: 50 })
     
     await page.getByTestId("save-recipe-button").click({ force: true })
+    
     await expect(page.getByText('Recipe saved')).toBeVisible( {timeout: 10000})
 
     await page.goto('/planning') 
@@ -38,8 +39,7 @@ test.describe('Weekly Planner Functions', () => {
 
     const dateKey = format(new Date(), "yyyy-MM-dd");
     await page.getByTestId(`meal-slot-${dateKey}-1`).click({ force: true })
-
-    await page.getByText(recipeName).click({ force: true })
+    await page.getByText(recipeName).click()
 
     await deleteRecipe(page, recipeName)
   })
@@ -69,6 +69,8 @@ test.describe('Weekly Planner Functions', () => {
 
     await page.getByTestId(`meal-slot-${dateKey}-2`).click({ force: true })
     await dialog.getByText(recipeName).click();
+    
+    await page.waitForTimeout(1000)
     await expect(dialog.getByText('You already added this recipe.')).toBeVisible({timeout: 10000})
   })
 })

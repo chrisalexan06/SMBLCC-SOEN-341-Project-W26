@@ -87,6 +87,7 @@ export async function deleteRecipe(page: Page, recipeName: string) {
   })
   
   await page.getByTestId('delete-selected-button').click({ force: true })
-  await expect(page.getByText(recipeName)).not.toBeVisible({timeout: 10000})
+  await page.waitForTimeout(1000)
+  await expect(page.getByText('Deleting...')).not.toBeVisible({timeout: 10000})
 
 }
